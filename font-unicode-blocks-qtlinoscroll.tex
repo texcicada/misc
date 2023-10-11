@@ -1,0 +1,563 @@
+\documentclass{article} 
+\usepackage{xcolor}
+\usepackage{fontspec}
+\setmainfont{NotoSerif}
+\newcommand\fontfacename{QT Linoscroll}
+\newfontface{\fsample}{\fontfacename}
+
+
+
+
+\ExplSyntaxOn
+
+
+\seq_new:N \g_uc_main_seq
+
+\seq_new:N \g_uc_blockrecord_seq
+\seq_new:N \g_uc_blockrange_seq
+\tl_new:N \g_uc_blockrange_tl
+\tl_new:N \g_uc_blockname_tl
+\tl_new:N \g_uc_blockstart_tl
+\tl_new:N \g_uc_blockfinish_tl
+\int_new:N \g_uc_blockstart_int
+\int_new:N \g_uc_blockfinish_int
+\bool_new:N \g_uc_blockexists_bool
+\int_new:N \g_uc_glyphcount_int
+\int_new:N \g_uc_glyphtotal_int
+
+\cs_generate_variant:Nn \int_from_hex:n  { o }
+
+
+
+%=================
+\cs_new_protected:Npn \func_printachar:n #1 {
+%	\token_if_eq_charcode:NNTF #1 #2
+	\iffontchar\font #1 
+	\symbol{#1}
+	\space
+	\fi
+}
+
+\cs_new_protected:Npn \func_checkablock:n #1 {
+
+	\int_gincr:N 
+		\g_uc_glyphtotal_int
+
+	\iffontchar\font #1 
+		\bool_gset_true:N 
+			\g_uc_blockexists_bool
+		\int_gincr:N 
+			\g_uc_glyphcount_int
+	\fi
+}
+
+%=================
+\cs_new_protected:Npn \func_printablock:n #1 {
+
+%		#1 = (,)name;start..finish
+
+%	get the block info  ========----------------
+		\seq_gset_split:Nnn
+			\g_uc_blockrecord_seq
+			{ ; }
+			{ #1 }
+%	get the block name  ========----------------
+		\tl_set:Nx
+			\g_uc_blockname_tl
+			{
+				\seq_item:Nn
+					\g_uc_blockrecord_seq
+					{ 1 }
+			}
+%%		\tl_show:N
+%%			\g_uc_blockname_tl
+
+%	get the block range data  ========----------------
+		\tl_set:Nx
+			\g_uc_blockrange_tl
+			{
+				\seq_item:Nn
+					\g_uc_blockrecord_seq
+					{ 2 }
+			}
+%%		\tl_show:N
+%%			\g_uc_blockrange_tl
+
+%	get the block range info  ========----------------
+		\seq_gset_split:NnV
+			\g_uc_blockrange_seq
+			{ .. }
+			\g_uc_blockrange_tl 
+%%		\seq_show:N
+%%			\g_uc_blockrange_seq
+
+%		get the block start  ========----------------
+		\tl_set:Nx
+			\g_uc_blockstart_tl
+			{
+				\seq_item:Nn
+					\g_uc_blockrange_seq
+					{ 1 }
+			}
+%%		\tl_show:N
+%%			\g_uc_blockstart_tl
+		\int_set:Nn
+			\g_uc_blockstart_int
+			{
+				\int_from_hex:o{
+					\g_uc_blockstart_tl
+					}
+			}
+%%		\int_show:N
+%%			\g_uc_blockstart_int
+
+%		get the block finish  ========----------------
+		\tl_set:Nx
+			\g_uc_blockfinish_tl
+			{
+				\seq_item:Nn
+					\g_uc_blockrange_seq
+					{ 2 }
+			}
+%%		\tl_show:N
+%%			\g_uc_blockfinish_tl
+		\int_set:Nn
+			\g_uc_blockfinish_int
+			{
+				\int_from_hex:o{
+					\g_uc_blockfinish_tl
+					}
+			}
+%		\int_show:N
+%			\g_uc_blockfinish_int
+	\bool_gset_false:N 
+		\g_uc_blockexists_bool
+		
+\int_gset:Nn 
+		\g_uc_glyphcount_int
+		{ 0 }
+\int_gset:Nn 
+		\g_uc_glyphtotal_int
+		{ 0 }
+		
+	\int_step_function:nnN
+		{ \g_uc_blockstart_int }
+		{ \g_uc_blockfinish_int }
+		\func_checkablock:n
+	
+	
+	\bool_if:NT
+	\g_uc_blockexists_bool
+	{
+
+		\group_begin:
+		\tex_par:D
+		\sffamily
+		\color{blue}
+		\noindent
+		\tl_use:N
+			\g_uc_blockname_tl
+		\group_end:
+		\tex_par:D
+
+	\begin{quotation}\noindent
+	\marginpar{{
+				\small\ttfamily
+				\int_use:N 
+					\g_uc_glyphcount_int
+				\space of ~
+				\int_use:N 
+					\g_uc_glyphtotal_int 
+					\tiny\\[-1.8ex]\fontfacename 
+					}}
+	\int_step_function:nnN
+		{ \g_uc_blockstart_int }
+		{ \g_uc_blockfinish_int }
+		\func_printachar:n
+	\end{quotation}
+
+	}
+
+} 
+
+
+
+%=================
+\NewDocumentCommand{ \mfsprintablock }{ m }{
+
+	{ \noindent\large #1 \tex_par:D }	% fontname
+	{ \noindent\normalfont\small #1 \tex_par:D }
+	\group_begin:
+		\seq_map_function:NN
+			\g_uc_main_seq
+			\func_printablock:n
+	\group_end:
+}
+
+
+
+%=================
+\NewDocumentCommand{ \mfssortaseq }{  }{
+	\seq_sort:Nn
+		\g_uc_main_seq
+		{
+			\str_compare:nNnTF
+				{ ##1 } > { ##2 }
+				{ \sort_return_swapped: }
+				{ \sort_return_same: }
+		}
+}
+
+
+%=================
+\NewDocumentCommand{ \mfsloadaseq }{ m }{
+		\seq_clear:N \g_uc_main_seq
+		\seq_gset_split:Nnn
+			\g_uc_main_seq
+			{ , }
+			{ #1 }
+		\mfssortaseq
+}
+
+
+
+
+\mfsloadaseq{
+Basic Latin;0000..007F;x 
+,Latin-1 Supplement;0080..00FF;x 
+,Latin Extended-A;0100..017F;x 
+,Latin Extended-B;0180..024F;x 
+,IPA Extensions;0250..02AF;x 
+,Spacing Modifier Letters;02B0..02FF;x 
+,Combining Diacritical Marks;0300..036F;x 
+,Greek and Coptic;0370..03FF;x 
+,Cyrillic;0400..04FF;x 
+,Cyrillic Supplement;0500..052F;x 
+,Armenian;0530..058F;x 
+,Hebrew;0590..05FF;x 
+,Arabic;0600..06FF;x 
+,Syriac;0700..074F;x 
+,Arabic Supplement;0750..077F;x 
+,Thaana;0780..07BF;x 
+,NKo;07C0..07FF;x 
+,Samaritan;0800..083F;x 
+,Mandaic;0840..085F;x 
+,Syriac Supplement;0860..086F;x 
+,Arabic Extended-B;0870..089F;x 
+,Arabic Extended-A;08A0..08FF;x 
+,Devanagari;0900..097F;x 
+,Bengali;0980..09FF;x 
+,Gurmukhi;0A00..0A7F;x 
+,Gujarati;0A80..0AFF;x 
+,Oriya;0B00..0B7F;x 
+,Tamil;0B80..0BFF;x 
+,Telugu;0C00..0C7F;x 
+,Kannada;0C80..0CFF;x 
+,Malayalam;0D00..0D7F;x 
+,Sinhala;0D80..0DFF;x 
+,Thai;0E00..0E7F;x 
+,Lao;0E80..0EFF;x 
+,Tibetan;0F00..0FFF;x 
+,Myanmar;1000..109F;x 
+,Georgian;10A0..10FF;x 
+,Hangul Jamo;1100..11FF;x 
+,Ethiopic;1200..137F;x 
+,Ethiopic Supplement;1380..139F;x 
+,Cherokee;13A0..13FF;x 
+,Unified Canadian Aboriginal Syllabics;1400..167F;x 
+,Ogham;1680..169F;x 
+,Runic;16A0..16FF;x 
+,Tagalog;1700..171F;x 
+,Hanunoo;1720..173F;x 
+,Buhid;1740..175F;x 
+,Tagbanwa;1760..177F;x 
+,Khmer;1780..17FF;x 
+,Mongolian;1800..18AF;x 
+,Unified Canadian Aboriginal Syllabics Extended;18B0..18FF;x 
+,Limbu;1900..194F;x 
+,Tai Le;1950..197F;x 
+,New Tai Lue;1980..19DF;x 
+,Khmer Symbols;19E0..19FF;x 
+,Buginese;1A00..1A1F;x 
+,Tai Tham;1A20..1AAF;x 
+,Combining Diacritical Marks Extended;1AB0..1AFF;x 
+,Balinese;1B00..1B7F;x 
+,Sundanese;1B80..1BBF;x 
+,Batak;1BC0..1BFF;x 
+,Lepcha;1C00..1C4F;x 
+,Ol Chiki;1C50..1C7F;x 
+,Cyrillic Extended-C;1C80..1C8F;x 
+,Georgian Extended;1C90..1CBF;x 
+,Sundanese Supplement;1CC0..1CCF;x 
+,Vedic Extensions;1CD0..1CFF;x 
+,Phonetic Extensions;1D00..1D7F;x 
+,Phonetic Extensions Supplement;1D80..1DBF;x 
+,Combining Diacritical Marks Supplement;1DC0..1DFF;x 
+,Latin Extended Additional;1E00..1EFF;x 
+,Greek Extended;1F00..1FFF;x 
+,General Punctuation;2000..206F;x 
+,Superscripts and Subscripts;2070..209F;x 
+,Currency Symbols;20A0..20CF;x 
+,Combining Diacritical Marks for Symbols;20D0..20FF;x 
+,Letterlike Symbols;2100..214F;x 
+,Number Forms;2150..218F;x 
+,Arrows;2190..21FF;x 
+,Mathematical Operators;2200..22FF;x 
+,Miscellaneous Technical;2300..23FF;x 
+,Control Pictures;2400..243F;x 
+,Optical Character Recognition;2440..245F;x 
+,Enclosed Alphanumerics;2460..24FF;x 
+,Box Drawing;2500..257F;x 
+,Block Elements;2580..259F;x 
+,Geometric Shapes;25A0..25FF;x 
+,Miscellaneous Symbols;2600..26FF;x 
+,Dingbats;2700..27BF;x 
+,Miscellaneous Mathematical Symbols-A;27C0..27EF;x 
+,Supplemental Arrows-A;27F0..27FF;x 
+,Braille Patterns;2800..28FF;x 
+,Supplemental Arrows-B;2900..297F;x 
+,Miscellaneous Mathematical Symbols-B;2980..29FF;x 
+,Supplemental Mathematical Operators;2A00..2AFF;x 
+,Miscellaneous Symbols and Arrows;2B00..2BFF;x 
+,Glagolitic;2C00..2C5F;x 
+,Latin Extended-C;2C60..2C7F;x 
+,Coptic;2C80..2CFF;x 
+,Georgian Supplement;2D00..2D2F;x 
+,Tifinagh;2D30..2D7F;x 
+,Ethiopic Extended;2D80..2DDF;x 
+,Cyrillic Extended-A;2DE0..2DFF;x 
+,Supplemental Punctuation;2E00..2E7F;x 
+,CJK Radicals Supplement;2E80..2EFF;x 
+,Kangxi Radicals;2F00..2FDF;x 
+,Ideographic Description Characters;2FF0..2FFF;x 
+,CJK Symbols and Punctuation;3000..303F;x 
+,Hiragana;3040..309F;x 
+,Katakana;30A0..30FF;x 
+,Bopomofo;3100..312F;x 
+,Hangul Compatibility Jamo;3130..318F;x 
+,Kanbun;3190..319F;x 
+,Bopomofo Extended;31A0..31BF;x 
+,CJK Strokes;31C0..31EF;x 
+,Katakana Phonetic Extensions;31F0..31FF;x 
+,Enclosed CJK Letters and Months;3200..32FF;x 
+,CJK Compatibility;3300..33FF;x 
+,CJK Unified Ideographs Extension A;3400..4DBF;x 
+,Yijing Hexagram Symbols;4DC0..4DFF;x 
+,CJK Unified Ideographs;4E00..9FFF;x 
+,Yi Syllables;A000..A48F;x 
+,Yi Radicals;A490..A4CF;x 
+,Lisu;A4D0..A4FF;x 
+,Vai;A500..A63F;x 
+,Cyrillic Extended-B;A640..A69F;x 
+,Bamum;A6A0..A6FF;x 
+,Modifier Tone Letters;A700..A71F;x 
+,Latin Extended-D;A720..A7FF;x 
+,Syloti Nagri;A800..A82F;x 
+,Common Indic Number Forms;A830..A83F;x 
+,Phags-pa;A840..A87F;x 
+,Saurashtra;A880..A8DF;x 
+,Devanagari Extended;A8E0..A8FF;x 
+,Kayah Li;A900..A92F;x 
+,Rejang;A930..A95F;x 
+,Hangul Jamo Extended-A;A960..A97F;x 
+,Javanese;A980..A9DF;x 
+,Myanmar Extended-B;A9E0..A9FF;x 
+,Cham;AA00..AA5F;x 
+,Myanmar Extended-A;AA60..AA7F;x 
+,Tai Viet;AA80..AADF;x 
+,Meetei Mayek Extensions;AAE0..AAFF;x 
+,Ethiopic Extended-A;AB00..AB2F;x 
+,Latin Extended-E;AB30..AB6F;x 
+,Cherokee Supplement;AB70..ABBF;x 
+,Meetei Mayek;ABC0..ABFF;x 
+,Hangul Syllables;AC00..D7AF;x 
+,Hangul Jamo Extended-B;D7B0..D7FF;x 
+,Private Use Area;E000..F8FF;x 
+,CJK Compatibility Ideographs;F900..FAFF;x 
+,Alphabetic Presentation Forms;FB00..FB4F;x 
+,Arabic Presentation Forms-A;FB50..FDFF;x 
+,Variation Selectors;FE00..FE0F;x 
+,Vertical Forms;FE10..FE1F;x 
+,Combining Half Marks;FE20..FE2F;x 
+,CJK Compatibility Forms;FE30..FE4F;x 
+,Small Form Variants;FE50..FE6F;x 
+,Arabic Presentation Forms-B;FE70..FEFF;x 
+,Halfwidth and Fullwidth Forms;FF00..FFEF;x 
+,Specials;FFF0..FFFF;x 
+,Linear B Syllabary;10000..1007F;x 
+,Linear B Ideograms;10080..100FF;x 
+,Aegean Numbers;10100..1013F;x 
+,Ancient Greek Numbers;10140..1018F;x 
+,Ancient Symbols;10190..101CF;x 
+,Phaistos Disc;101D0..101FF;x 
+,Lycian;10280..1029F;x 
+,Carian;102A0..102DF;x 
+,Coptic Epact Numbers;102E0..102FF;x 
+,Old Italic;10300..1032F;x 
+,Gothic;10330..1034F;x 
+,Old Permic;10350..1037F;x 
+,Ugaritic;10380..1039F;x 
+,Old Persian;103A0..103DF;x 
+,Deseret;10400..1044F;x 
+,Shavian;10450..1047F;x 
+,Osmanya;10480..104AF;x 
+,Osage;104B0..104FF;x 
+,Elbasan;10500..1052F;x 
+,Caucasian Albanian;10530..1056F;x 
+,Vithkuqi;10570..105BF;x 
+,Linear A;10600..1077F;x 
+,Latin Extended-F;10780..107BF;x 
+,Cypriot Syllabary;10800..1083F;x 
+,Imperial Aramaic;10840..1085F;x 
+,Palmyrene;10860..1087F;x 
+,Nabataean;10880..108AF;x 
+,Hatran;108E0..108FF;x 
+,Phoenician;10900..1091F;x 
+,Lydian;10920..1093F;x 
+,Meroitic Hieroglyphs;10980..1099F;x 
+,Meroitic Cursive;109A0..109FF;x 
+,Kharoshthi;10A00..10A5F;x 
+,Old South Arabian;10A60..10A7F;x 
+,Old North Arabian;10A80..10A9F;x 
+,Manichaean;10AC0..10AFF;x 
+,Avestan;10B00..10B3F;x 
+,Inscriptional Parthian;10B40..10B5F;x 
+,Inscriptional Pahlavi;10B60..10B7F;x 
+,Psalter Pahlavi;10B80..10BAF;x 
+,Old Turkic;10C00..10C4F;x 
+,Old Hungarian;10C80..10CFF;x 
+,Hanifi Rohingya;10D00..10D3F;x 
+,Rumi Numeral Symbols;10E60..10E7F;x 
+,Yezidi;10E80..10EBF;x 
+,Arabic Extended-C;10EC0..10EFF;x 
+,Old Sogdian;10F00..10F2F;x 
+,Sogdian;10F30..10F6F;x 
+,Old Uyghur;10F70..10FAF;x 
+,Chorasmian;10FB0..10FDF;x 
+,Elymaic;10FE0..10FFF;x 
+,Brahmi;11000..1107F;x 
+,Kaithi;11080..110CF;x 
+,Sora Sompeng;110D0..110FF;x 
+,Chakma;11100..1114F;x 
+,Mahajani;11150..1117F;x 
+,Sharada;11180..111DF;x 
+,Sinhala Archaic Numbers;111E0..111FF;x 
+,Khojki;11200..1124F;x 
+,Multani;11280..112AF;x 
+,Khudawadi;112B0..112FF;x 
+,Grantha;11300..1137F;x 
+,Newa;11400..1147F;x 
+,Tirhuta;11480..114DF;x 
+,Siddham;11580..115FF;x 
+,Modi;11600..1165F;x 
+,Mongolian Supplement;11660..1167F;x 
+,Takri;11680..116CF;x 
+,Ahom;11700..1174F;x 
+,Dogra;11800..1184F;x 
+,Warang Citi;118A0..118FF;x 
+,Dives Akuru;11900..1195F;x 
+,Nandinagari;119A0..119FF;x 
+,Zanabazar Square;11A00..11A4F;x 
+,Soyombo;11A50..11AAF;x 
+,Unified Canadian Aboriginal Syllabics Extended-A;11AB0..11ABF;x 
+,Pau Cin Hau;11AC0..11AFF;x 
+,Devanagari Extended-A;11B00..11B5F;x 
+,Bhaiksuki;11C00..11C6F;x 
+,Marchen;11C70..11CBF;x 
+,Masaram Gondi;11D00..11D5F;x 
+,Gunjala Gondi;11D60..11DAF;x 
+,Makasar;11EE0..11EFF;x 
+,Kawi;11F00..11F5F;x 
+,Lisu Supplement;11FB0..11FBF;x 
+,Tamil Supplement;11FC0..11FFF;x 
+,Cuneiform;12000..123FF;x 
+,Cuneiform Numbers and Punctuation;12400..1247F;x 
+,Early Dynastic Cuneiform;12480..1254F;x 
+,Cypro-Minoan;12F90..12FFF;x 
+,Egyptian Hieroglyphs;13000..1342F;x 
+,Egyptian Hieroglyph Format Controls;13430..1345F;x 
+,Anatolian Hieroglyphs;14400..1467F;x 
+,Bamum Supplement;16800..16A3F;x 
+,Mro;16A40..16A6F;x 
+,Tangsa;16A70..16ACF;x 
+,Bassa Vah;16AD0..16AFF;x 
+,Pahawh Hmong;16B00..16B8F;x 
+,Medefaidrin;16E40..16E9F;x 
+,Miao;16F00..16F9F;x 
+,Ideographic Symbols and Punctuation;16FE0..16FFF;x 
+,Tangut;17000..187FF;x 
+,Tangut Components;18800..18AFF;x 
+,Khitan Small Script;18B00..18CFF;x 
+,Tangut Supplement;18D00..18D7F;x 
+,Kana Extended-B;1AFF0..1AFFF;x 
+,Kana Supplement;1B000..1B0FF;x 
+,Kana Extended-A;1B100..1B12F;x 
+,Small Kana Extension;1B130..1B16F;x 
+,Nushu;1B170..1B2FF;x 
+,Duployan;1BC00..1BC9F;x 
+,Shorthand Format Controls;1BCA0..1BCAF;x 
+,Znamenny Musical Notation;1CF00..1CFCF;x 
+,Byzantine Musical Symbols;1D000..1D0FF;x 
+,Musical Symbols;1D100..1D1FF;x 
+,Ancient Greek Musical Notation;1D200..1D24F;x 
+,Kaktovik Numerals;1D2C0..1D2DF;x 
+,Mayan Numerals;1D2E0..1D2FF;x 
+,Tai Xuan Jing Symbols;1D300..1D35F;x 
+,Counting Rod Numerals;1D360..1D37F;x 
+,Mathematical Alphanumeric Symbols;1D400..1D7FF;x 
+,Sutton SignWriting;1D800..1DAAF;x 
+,Latin Extended-G;1DF00..1DFFF;x 
+,Glagolitic Supplement;1E000..1E02F;x 
+,Cyrillic Extended-D;1E030..1E08F;x 
+,Nyiakeng Puachue Hmong;1E100..1E14F;x 
+,Toto;1E290..1E2BF;x 
+,Wancho;1E2C0..1E2FF;x 
+,Nag Mundari;1E4D0..1E4FF;x 
+,Ethiopic Extended-B;1E7E0..1E7FF;x 
+,Mende Kikakui;1E800..1E8DF;x 
+,Adlam;1E900..1E95F;x 
+,Indic Siyaq Numbers;1EC70..1ECBF;x 
+,Ottoman Siyaq Numbers;1ED00..1ED4F;x 
+,Arabic Mathematical Alphabetic Symbols;1EE00..1EEFF;x 
+,Mahjong Tiles;1F000..1F02F;x 
+,Domino Tiles;1F030..1F09F;x 
+,Playing Cards;1F0A0..1F0FF;x 
+,Enclosed Alphanumeric Supplement;1F100..1F1FF;x 
+,Enclosed Ideographic Supplement;1F200..1F2FF;x 
+,Miscellaneous Symbols and Pictographs;1F300..1F5FF;x 
+,Emoticons;1F600..1F64F;x 
+,Ornamental Dingbats;1F650..1F67F;x 
+,Transport and Map Symbols;1F680..1F6FF;x 
+,Alchemical Symbols;1F700..1F77F;x 
+,Geometric Shapes Extended;1F780..1F7FF;x 
+,Supplemental Arrows-C;1F800..1F8FF;x 
+,Supplemental Symbols and Pictographs;1F900..1F9FF;x 
+,Chess Symbols;1FA00..1FA6F;x 
+,Symbols and Pictographs Extended-A;1FA70..1FAFF;x 
+,Symbols for Legacy Computing;1FB00..1FBFF;x 
+,CJK Unified Ideographs Extension B;20000..2A6DF;x 
+,CJK Unified Ideographs Extension C;2A700..2B73F;x 
+,CJK Unified Ideographs Extension D;2B740..2B81F;x 
+,CJK Unified Ideographs Extension E;2B820..2CEAF;x 
+,CJK Unified Ideographs Extension F;2CEB0..2EBEF;x 
+,CJK Unified Ideographs Extension I;2EBF0..2EE5F;x 
+,CJK Compatibility Ideographs Supplement;2F800..2FA1F;x 
+,CJK Unified Ideographs Extension G;30000..3134F;x 
+,CJK Unified Ideographs Extension H;31350..323AF;x 
+,Tags;E0000..E007F;x 
+,Variation Selectors Supplement;E0100..E01EF;x 
+,Supplementary Private Use Area-A;F0000..FFFFF;x 
+,Supplementary Private Use Area-B;100000..10FFFF;x 
+}
+
+\ExplSyntaxOff
+
+
+\begin{document}
+
+
+
+\fsample
+\mfsprintablock{\fontfacename}
+
+\end{document}

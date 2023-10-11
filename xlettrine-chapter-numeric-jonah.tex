@@ -1,0 +1,545 @@
+\documentclass{book}
+\usepackage{fontspec}
+\usepackage{sectsty}
+\usepackage{multicol}
+\usepackage[most]{xcolor}
+\definecolor{pale-yellow}{rgb}{0.9,0.95,0.8}
+\definecolor{pale-blue}{rgb}{0.8,0.8,0.95}
+\usepackage{luacolor}
+\usepackage{lua-ul}
+
+\setmainfont{NotoSerif}
+\newfontfamily\fcmd{NotoSans}[Colour=blue,NFSSFamily=noto,Scale=4]
+\newcommand\cmd[1]{{\fcmd#1}}
+\newfontfamily\fAcorn{Acorn}[Colour=red,NFSSFamily=acornx,Scale=4]
+\setlength{\columnseprule}{0.48pt}
+
+\chapterfont{\phantom}
+\def\chapter{\refstepcounter{chapter}}
+\sectionfont{\phantom}
+\def\section{\refstepcounter{section}}
+
+\newcommand\marktitlebook[1]{\begin{center}{\large\bfseries #1}\end{center}}
+\newcommand\markendbook{\begin{center}*\end{center}}
+
+\newcommand\speechcolour{\color{blue}}
+\newcommand\speechformat{\speechcolour\itshape}
+\newcommand\speech[1]{{\speechformat{#1}}}
+
+\newcommand\xchapter[1]{\xletttextdiv\chapter{#1}\xlettrine{\thechapter}} 
+
+\newcommand\xvv[1]{{\sffamily\small\color{red}\textsuperscript{\section{\thesection}}}} 
+
+
+
+
+\newcommand\xletttextdiv{\ \par
+\noindent
+%:\hfill\rule{0.32\textwidth}{0.5pt}\hfill :
+\par\smallskip}
+
+\newcommand\xlettrinehelptext{%
+A x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+x x x x x x x x x x x x x x x x x x x x  xx x x x x x x 
+}
+
+
+
+
+	
+\ExplSyntaxOn
+
+
+\bool_new:N \l_xlett_legacyfont_bool % true for legacy fonts
+\fp_new:N \l_xlett_vfactor_fp % how much of lettrine to move para up by, e.g., -1.3 times
+\tl_new:N \l_xlett_font_tl % for legacy fonts, e.g., \input Acorn.fd
+\dim_new:N \l_xlett_font_size_dim % for legacy fonts, e.g., 60pt
+\dim_new:N \l_xlett_font_baselineskip_dim % for legacy fonts, e.g., 72pt
+\tl_new:N \l_xlett_font_type_tl % for legacy fonts, e.g., T1
+\tl_new:N \l_xlett_font_family_tl % for legacy fonts, e.g., Acorn
+\tl_new:N \l_xlett_font_series_tl % for legacy fonts, e.g., m
+\tl_new:N \l_xlett_font_shape_tl % for legacy fonts, e.g., n
+\tl_new:N \l_xlett_firstword_tl
+\tl_new:N \l_xlett_initial_tl
+
+\dim_new:N \l_xlett_initkern_dim % of first word's tail, e.g., -0.3em
+\dim_new:N \l_xlett_indentbuffer_dim % space around lettrine, e.g., 0.4em
+
+
+
+
+
+\keys_define:nn { xlettrine }
+  {
+    legacy-font .bool_set:N = \l_xlett_legacyfont_bool,
+    legacy-font .default:n = true,
+    legacy-font .initial:n = true,
+
+    font .tl_set:N = \l_xlett_font_tl,
+    font .default:n = {\input Acorn.fd},
+    font .initial:n = {\input Acorn.fd},
+
+    font-size .dim_set:N =\l_xlett_font_size_dim,
+    font-size .default:n = {60pt},
+    font-size .initial:n = {60pt},
+
+    font-baselineskip .dim_set:N =\l_xlett_font_baselineskip_dim,
+    font-baselineskip .default:n = {72pt},
+    font-baselineskip .initial:n = {72pt},
+    
+%		\fontsize{60pt}{72pt}\usefont{U}{Acorn}{xl}{n}
+	font-type .tl_set:N = \l_xlett_font_type_tl,
+	font-family .tl_set:N = \l_xlett_font_family_tl,
+	font-series .tl_set:N = \l_xlett_font_series_tl,
+	font-shape .tl_set:N = \l_xlett_font_shape_tl,
+
+	font-type .default:n = U,
+	font-family .default:n = Acorn,
+	font-series .default:n = xl,
+	font-shape .default:n = n,
+        
+	font-type .initial:n = U,
+	font-family .initial:n = Acorn,
+	font-series .initial:n = xl,
+	font-shape .initial:n = n,
+
+	initial-kern .dim_set:N = \l_xlett_initkern_dim,
+	initial-kern .default:n = { -0.5em },
+	initial-kern .initial:n = { -0.5em },
+
+	indent-buffer .dim_set:N = \l_xlett_indentbuffer_dim,
+	indent-buffer .default:n = {0.4em},
+	indent-buffer .initial:n = {0.4em},
+		
+	line-buffer .int_set:N = \l_xlett_linebuffer_int,
+	line-buffer .default:n = { 2 },
+	line-buffer .initial:n = { 2 },
+		
+	vspace-factor .fp_set:N = \l_xlett_vfactor_fp,
+	vspace-factor .default:n = { -1.3 },
+	vspace-factor .initial:n = { -1.3 },
+		
+	%    help .code:n = { \xlettrinehelp },
+    
+  }
+
+
+
+\cs_generate_variant:Nn \tl_remove_once:Nn { No }
+
+
+\NewDocumentCommand { \xlettlm } {  } {
+	\leftskip \dim_eval:n {\l_xlett_indentbuffer_dim + \box_wd:N \l_tmpa_box}
+}
+
+
+\int_new:N \l_xlett_countdown_int
+%\int_set:Nn \l_xlett_countdown_int {5}
+
+\NewDocumentCommand { \xlettpar } {  } {
+	\AddToHookNext{para/end}
+	{
+	 \int_use:N \l_xlett_countdown_int 
+
+	\int_compare:nNnTF
+		{ \l_xlett_countdown_int } > { 0 }
+		{ 
+			\xlettlm 	
+			\int_decr:N \l_xlett_countdown_int 
+			\xlettpar 
+			}
+		{ 
+			\leftskip=0pt 
+			\int_set:Nn \l_xlett_countdown_int {5}
+		}
+	}
+}
+
+
+
+\NewDocumentCommand { \xlettrineset } { o } {
+
+	\keys_set:nn { xlettrine } { #1 } 
+		}
+		
+
+\NewDocumentCommand { \xlettrine } { o m } {
+
+
+		\tl_if_novalue:nF{#1}
+		{\keys_set:nn { xlettrine } { #1 } }
+			
+
+
+
+	\tl_set:Nn 
+		\l_xlett_firstword_tl  %Qwerty
+		{ {#2 }}
+	\tl_set:Nx 
+		\l_xlett_initial_tl   %Q
+		{ 
+			\tl_item:Nn 
+				\l_xlett_firstword_tl
+				{ 1 }
+		 }
+	\tl_remove_once:No
+		\l_xlett_firstword_tl   %werty
+		{ \l_xlett_initial_tl }
+		 
+		 
+%		\tl_if_eq:NNT
+%		\l_xlett_firstword_tl  
+%		 \l_xlett_initial_tl 
+%		{ \tl_clear:N \l_xlett_firstword_tl }
+%%		 \tl_show:N \l_xlett_firstword_tl
+%		 \tl_show:N \l_xlett_initial_tl
+	\bool_if:NTF
+	\l_xlett_legacyfont_bool
+	{
+	\hbox_set:Nn
+		\l_tmpa_box
+		{
+		\group_begin:
+		\tl_use:N
+			\l_xlett_font_tl
+			%	\input Acorn.fd
+		\fontsize
+			{ \dim_use:N \l_xlett_font_size_dim }
+			{ \dim_use:N \l_xlett_font_baselineskip_dim }
+			
+		\usefont
+			{ \tl_use:N \l_xlett_font_type_tl }
+			{ \tl_use:N \l_xlett_font_family_tl }
+			{ \tl_use:N \l_xlett_font_series_tl }
+			{ \tl_use:N \l_xlett_font_shape_tl }
+  		\l_xlett_initial_tl
+  		\group_end:
+
+  		} 
+  		} % legacy font
+
+	{ % fontspec font
+	\hbox_set:Nn
+		\l_tmpa_box
+		{
+		\group_begin:
+			\tl_use:N
+				\l_xlett_font_tl
+	  		\l_xlett_initial_tl
+  		\group_end:
+  		} 
+  		} % fontspec font
+
+	
+	\box_use:N \l_tmpa_box
+	\vspace{ \fp_use:N \l_xlett_vfactor_fp \box_ht:N \l_tmpa_box}
+	\hangindent=\dim_eval:n {\l_xlett_indentbuffer_dim + \box_wd:N \l_tmpa_box}
+	\hangafter=-\fp_to_int:n { \l_xlett_linebuffer_int + \box_ht:N \l_tmpa_box / \baselineskip }
+	\noindent
+	\kern  \dim_use:N \l_xlett_initkern_dim
+%	\textsc{ \tl_use:N \l_xlett_firstword_tl }
+}
+
+
+\ExplSyntaxOff
+
+
+
+\begin{document}
+
+\xlettrineset[
+     legacy-font=true,
+%     font=\color{purple}\bfseries\Huge\fcmd,%\fcmd,
+	font-family = lmr,
+	font-series = xl,
+	font-shape = n,
+	line-buffer = 1,
+	initial-kern=0em,
+        ]
+
+
+
+        
+\begin{multicols}{2}
+\marktitlebook{Jonah}
+\xchapter{}
+\xvv{} Now the word of the LORD came unto Jonah the son of Amittai,
+           saying,
+
+\xvv{} \speech{%
+           Arise, go to Nineveh, that great city, and cry against it; for
+           their wickedness is come up before me.
+           }
+
+\xvv{} But Jonah rose up to flee unto Tarshish from the presence of
+           the LORD, and went down to Joppa; and he found a ship going to
+           Tarshish: so he paid the fare thereof, and went down into it,
+           to go with them unto Tarshish from the presence of the LORD.
+
+\xvv{} But the LORD sent out a great wind into the sea, and there was
+           a mighty tempest in the sea, so that the ship was like to be
+           broken.
+
+\xvv{} Then the mariners were afraid, and cried every man unto his
+           god, and cast forth the wares that were in the ship into the
+           sea, to lighten it of them. But Jonah was gone down into the
+           sides of the ship; and he lay, and was fast asleep.
+
+\xvv{} So the shipmaster came to him, and said unto him, 
+          \speech{%
+          What meanest
+           thou, O sleeper? arise, call upon thy God, if so be that God
+           will think upon us, that we perish not.
+           }
+
+\xvv{} And they said every one to his fellow, 
+           \speech{%
+           Come, and let us cast
+           lots, that we may know for whose cause this evil is upon us.
+           }
+           So they cast lots, and the lot fell upon Jonah.
+
+\xvv{} Then said they unto him, 
+           \speech{%
+           Tell us, we pray thee, for whose
+           cause this evil is upon us; What is thine occupation? and
+           whence comest thou? what is thy country? and of what people
+           art thou?
+           }
+
+\xvv{} And he said unto them, 
+          \speech{%
+          I am an Hebrew; and I fear the LORD,
+           the God of heaven, which hath made the sea and the dry land.
+           }
+
+\xvv{} Then were the men exceedingly afraid, and said unto him. 
+           \speech{%
+           Why
+           hast thou done this? 
+           }%
+           For the men knew that he fled from the
+           presence of the LORD, because he had told them.
+
+\xvv{} Then said they unto him, 
+          \speech{%
+          What shall we do unto thee, that the
+           sea may be calm unto us?
+           }%
+           for the sea wrought, and was
+           tempestuous.
+
+\xvv{} And he said unto them, 
+          \speech{%
+          Take me up, and cast me forth into the
+           sea; so shall the sea be calm unto you: for I know that for my
+           sake this great tempest is upon you.
+           }
+
+\xvv{} Nevertheless the men rowed hard to bring it to the land; but
+           they could not: for the sea wrought, and was tempestuous
+           against them.
+
+\xvv{} Wherefore they cried unto the LORD, and said, 
+           \speech{%
+           We beseech thee,
+           O LORD, we beseech thee, let us not perish for this man's
+           life, and lay not upon us innocent blood: for thou, O LORD,
+           hast done as it pleased thee.
+           }
+
+\xvv{} So they took up Jonah, and cast him forth into the sea: and
+           the sea ceased from her raging.
+
+\xvv{} Then the men feared the LORD exceedingly, and offered a
+           sacrifice unto the LORD, and made vows.
+
+\xvv{} Now the LORD had prepared a great fish to swallow up Jonah.
+           And Jonah was in the belly of the fish three days and three
+           nights.
+
+\bigskip
+\xchapter{}
+\xvv{} Then Jonah prayed unto the LORD his God out of the fish's
+           belly,
+
+\xvv{} And said, 
+          \speech{%
+          I cried by reason of mine affliction unto the LORD,
+           and he heard me; out of the belly of hell cried I, and thou
+           heardest my voice.
+           }
+
+\xvv{} \speech{%
+          For thou hadst cast me into the deep, in the midst of the
+           seas; and the floods compassed me about: all thy billows and
+           thy waves passed over me.
+           }
+           
+\xvv{} \speech{%
+          Then I said, \emph{I am cast out of thy sight; yet I will look again
+           toward thy holy temple.}
+           }
+           
+\xvv{} \speech{%
+          The waters compassed me about, even to the soul: the depth
+           closed me round about, the weeds were wrapped about my head.
+           }
+           
+\xvv{} \speech{%
+          I went down to the bottoms of the mountains; the earth with
+           her bars was about me for ever: yet hast thou brought up my
+           life from corruption, O LORD my God.
+           }
+           
+\xvv{} \speech{%
+          When my soul fainted within me I remembered the LORD: and my
+           prayer came in unto thee, into thine holy temple.
+           }
+           
+\xvv{} \speech{%
+          They that observe lying vanities forsake their own mercy.
+           }
+           
+\xvv{} \speech{%
+          But I will sacrifice unto thee with the voice of thanksgiving;
+           I will pay that that I have vowed. Salvation is of the LORD.
+           }
+           
+\xvv{} And the LORD spake unto the fish, and it vomited out Jonah
+           upon the dry land.
+
+\bigskip
+\xchapter{}
+\xvv{} And the word of the LORD came unto Jonah the second time,
+           saying,
+
+\xvv{} \speech{%
+          Arise, go unto Nineveh, that great city, and preach unto it
+           the preaching that I bid thee.
+           }
+
+\xvv{} So Jonah arose, and went unto Nineveh, according to the word
+           of the LORD. Now Nineveh was an exceeding great city of three
+           days' journey.
+
+\xvv{} And Jonah began to enter into the city a day's journey, and he
+           cried, and said, 
+           \speech{%
+           Yet forty days, and Nineveh shall be
+           overthrown.
+           }
+
+\xvv{} So the people of Nineveh believed God, and proclaimed a fast,
+           and put on sackcloth, from the greatest of them even to the
+           least of them.
+
+\xvv{} For word came unto the king of Nineveh, and he arose from his
+           throne, and he laid his robe from him, and covered him with
+           sackcloth, and sat in ashes.
+
+\xvv{} And he caused it to be proclaimed and published through
+           Nineveh by the decree of the king and his nobles, saying, 
+           \speech{%
+           Let
+           neither man nor beast, herd nor flock, taste any thing: let
+           them not feed, nor drink water:
+           }
+
+\xvv{} \speech{%
+          But let man and beast be covered with sackcloth, and cry
+           mightily unto God: yea, let them turn every one from his evil
+           way, and from the violence that is in their hands.
+           }
+
+\xvv{} \speech{%
+          Who can tell if God will turn and repent, and turn away from
+           his fierce anger, that we perish not?
+           }
+
+\xvv{} And God saw their works, that they turned from their evil way;
+           and God repented of the evil, that he had said that he would
+           do unto them; and he did it not.
+
+\bigskip
+\xchapter{}
+\xvv{} But it displeased Jonah exceedingly, and he was very angry.
+
+\xvv{} And he prayed unto the LORD, and said, 
+          \speech{%
+          I pray thee, O LORD,
+           was not this my saying, when I was yet in my country?
+           Therefore I fled before unto Tarshish: for I knew that thou
+           art a gracious God, and merciful, slow to anger, and of great
+           kindness, and repentest thee of the evil.
+           }
+
+\xvv{} \speech{%
+          Therefore now, O LORD, take, I beseech thee, my life from me;
+           for it is better for me to die than to live.
+           }
+
+\xvv{} Then said the LORD, 
+          \speech{%
+          Doest thou well to be angry?
+          }
+
+\xvv{} So Jonah went out of the city, and sat on the east side of the
+           city, and there made him a booth, and sat under it in the
+           shadow, till he might see what would become of the city.
+
+\xvv{} And the LORD God prepared a gourd, and made it to come up over
+           Jonah, that it might be a shadow over his head, to deliver him
+           from his grief. So Jonah was exceeding glad of the gourd.
+
+\xvv{} But God prepared a worm when the morning rose the next day,
+           and it smote the gourd that it withered.
+
+\xvv{} And it came to pass, when the sun did arise, that God prepared
+           a vehement east wind; and the sun beat upon the head of Jonah,
+           that he fainted, and wished in himself to die, and said, 
+           \speech{%
+           It is
+           better for me to die than to live.
+           }
+
+\xvv{} And God said to Jonah, 
+          \speech{%
+          Doest thou well to be angry for the
+           gourd?
+           }
+            And he said, 
+            \speech{%
+            I do well to be angry, even unto death.
+            }
+
+\xvv{} Then said the LORD, 
+          \speech{%
+          Thou hast had pity on the gourd, for the
+           which thou hast not laboured, neither madest it grow; which
+           came up in a night, and perished in a night:
+           }
+
+\xvv{} \speech{%
+          And should not I spare Nineveh, that great city, wherein are
+           more then sixscore thousand persons that cannot discern
+           between their right hand and their left hand; and also much
+           cattle?
+           }
+
+\markendbook
+
+\end{multicols}
+
+\noindent\rule{\textwidth}{0.3pt}
+
+
+\end{document}
