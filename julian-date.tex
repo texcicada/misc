@@ -1,0 +1,235 @@
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\setmainfont{NotoSerif}
+
+
+%=======================
+\ExplSyntaxOn
+
+
+\fp_new:N \l_jd_xxday_fp
+\fp_new:N \l_jd_xxmonth_fp
+\fp_new:N \l_jd_xxyear_fp
+
+\fp_new:N \l_jd_resultmft_fp
+\fp_new:N \l_jd_resultaaa_fp
+\fp_new:N \l_jd_resultbbb_fp
+\fp_new:N \l_jd_resultccc_fp
+\fp_new:N \l_jd_resultddd_fp
+\fp_new:N \l_jd_result_fp
+\int_new:N \l_jd_resultp_int
+
+
+\keys_define:nn { juliandate }
+  {
+    print-JD-result .bool_set:N = \l_jd_printresult_bool,
+    print-JD-result .default:n = true,
+    print-JD-result .initial:n = true,
+	}
+
+%===================
+\cs_new_protected:Npn \func_juliandate #1#2#3 {
+
+
+\fp_set:Nn \l_jd_xxday_fp { #1 }
+\fp_set:Nn \l_jd_xxmonth_fp { #2 }
+\fp_set:Nn \l_jd_xxyear_fp { #3 }
+
+\fp_set:Nn
+	\l_jd_resultmft_fp
+	{
+		((\l_jd_xxmonth_fp)-14) / 12
+	}
+
+%\FPeval\resultMFT{((\xxmonth)-14) / 12}
+
+\fp_set:Nn
+	\l_jd_resultaaa_fp
+	{
+		( 1461 * ( (\l_jd_xxyear_fp) + 
+ 			4800 + 
+  			(\l_jd_resultmft_fp))) / 4
+	}
+%\fp_show:N
+%	\l_jd_resultaaa_fp
+%\FPeval\resultaa{ ( 1461 * ( (\xxyear) + %1))
+% 4800 + % 1))
+%  (\resultMFT))) / 4}
+
+
+\fp_set:Nn
+	\l_jd_resultbbb_fp
+	{
+		(367*((\l_jd_xxmonth_fp)-2-12 * ((\l_jd_resultmft_fp)) ))/12
+	}
+%\fp_show:N
+%	\l_jd_resultbbb_fp
+
+%\FPeval\resultbb{(367*((\xxmonth)-2-12 * ((\resultMFT)) ))/12}
+
+
+\fp_set:Nn
+	\l_jd_resultccc_fp
+	{
+		( 3 * ( ( (\l_jd_xxyear_fp) + 4900 + (\l_jd_resultmft_fp)) / 100)) /4
+	}
+%\fp_show:N
+%	\l_jd_resultccc_fp
+
+%\FPeval\resultcc{ ( 3 * ( ( (\xxyear) + 4900 + (\resultMFT)) / 100)) /4 }
+
+\fp_set:Nn
+	\l_jd_resultddd_fp
+	{
+		(\l_jd_xxday_fp) - 32075
+	}
+%\fp_show:N
+%	\l_jd_resultddd_fp
+
+%\FPeval\resultdd{(\xxday) - 32075} 	
+
+\fp_set:Nn
+	\l_jd_result_fp
+	{
+		\l_jd_resultaaa_fp + 
+		\l_jd_resultbbb_fp - 
+		\l_jd_resultccc_fp + 
+		\l_jd_resultddd_fp
+	}
+%\fp_show:N
+%	\l_jd_result_fp
+
+%\FPeval\result{clip(
+%(\resultaa) + (\resultbb) - (\resultcc) + (\resultdd) 
+%)
+%}
+%\exp_args:NNo
+\int_set:Nn
+	\l_jd_resultp_int
+	{
+		\fp_to_int:N \l_jd_result_fp 
+	}
+%\int_show:N
+%	\l_jd_result_int
+
+%\FPtrunc{\resultp}{\result}{1}
+
+	\bool_if:NT
+		\l_jd_printresult_bool
+		{
+			JD ~
+			\int_use:N
+				\l_jd_resultp_int
+		}
+	
+
+}
+
+
+\int_new:N \l_jd_datediff_int
+
+\NewDocumentCommand { \juliandatediff } { o m m } {
+
+%	\tl_if_novalue:nF { #1 }
+%	{ \keys_set:nn { juliandate } { #1 } } 
+	\keys_set:nn { juliandate } { print-JD-result=false, }	
+
+	\seq_set_split:Nnn
+		\l_tmpa_seq
+		{ - }
+		{ #2 }
+
+	\func_juliandate 
+		{  \seq_item:Nn \l_tmpa_seq { 3 }  }
+		{  \seq_item:Nn \l_tmpa_seq { 2 }  }
+		{ \seq_item:Nn \l_tmpa_seq { 1 } }
+		
+	\int_set_eq:NN 
+		\l_tmpa_int 
+		\l_jd_resultp_int  % first date 	
+
+	%
+	
+	\seq_set_split:Nnn
+		\l_tmpa_seq
+		{ - }
+		{ #3 }
+
+	\func_juliandate 
+		{  \seq_item:Nn \l_tmpa_seq { 3 }  }
+		{  \seq_item:Nn \l_tmpa_seq { 2 }  }
+		{ \seq_item:Nn \l_tmpa_seq { 1 } }
+		
+	\int_set_eq:NN 
+		\l_tmpb_int 
+		\l_jd_resultp_int % second date		
+		
+	% date difference	
+	\int_set:Nn
+		\l_jd_datediff_int
+		{ \l_tmpb_int - \l_tmpa_int}	
+		
+	\int_use:N
+		\l_jd_datediff_int		
+		
+	%reset func outputting
+	\keys_set:nn { juliandate } { print-JD-result=true, }	
+}
+
+
+
+
+\NewDocumentCommand { \juliandate } { o } {
+
+	\tl_if_novalue:nF { #1 }
+	{ \keys_set:nn { juliandate } { #1 } } 
+
+	\func_juliandate 
+		{ \the\day }
+		{ \the\month }
+		{ \the\year }
+}
+
+
+\NewDocumentCommand { \juliandateo } { m m m } {
+	\func_juliandate 
+		{ #1 }
+		{ #2 }
+		{ #3 }
+}
+
+\ExplSyntaxOff
+
+
+\begin{document}
+
+JD for 12-10-2023 = \juliandateo{12}{10}{2023}.
+
+Today is \juliandate.
+
+\juliandatediff{1905-08-20}{2023-10-13}
+
+
+And so is today: \juliandate.
+
+It's been
+\juliandatediff{2001-01-01}{\the\year-\the\month-\the\day}
+days since
+2001-01-01.
+
+\bigskip\noindent
+\textbf{Code usage}
+\begin{verbatim}
+JD for 12-10-2023 = \juliandateo{12}{10}{2023}.
+Today is \juliandate.
+\juliandatediff{1905-08-20}{2023-10-13}
+And so is today: \juliandate.
+It's been
+\juliandatediff{2001-01-01}{\the\year-\the\month-\the\day}
+days since
+2001-01-01.
+\end{verbatim}
+
+
+\end{document}
