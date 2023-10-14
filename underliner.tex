@@ -1,0 +1,586 @@
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\setmainfont{NotoSerif}
+\newfontfamily\ffont{NotoSerif}[Scale=0.01]
+
+
+
+
+%=======================
+\newfontfamily\fcmd{NotoSans}[Colour=blue]
+\newcommand\cmd[1]{{\fcmd#1}}
+
+\newcommand\trimahelptext{%
+letter in the string of characters can be overprinted up to \cmd{number-of-colours=} times (max of 4) using colours \cmd{trimacolour[a-d]=} clipped from the left in increasing order with \cmd{trimawidth[a-d]=} and formatted with switches such as \cmd{\textbackslash bfseries} (bold) and \cmd{\textbackslash itshape} (italic) using \cmd{format=}. For example, the above heading's trima scheme was done with:\\\\
+{\ttfamily
+\textbackslash trima[\\
+trimawidtha=1pt,\\
+trimawidthb=2.5pt,\\
+trimawidthc=5pt,\\
+trimawidthd=8pt,\\
+trimacoloura=red,\\
+trimacolourb=blue,\\
+trimacolourc=red!60!yellow,\\
+trimacolourd=green,\\
+]\{\} \\
+}
+}
+
+	
+
+
+%=======================
+\ExplSyntaxOn
+
+
+\tl_new:N \l_tmpc_tl
+%****************************************************
+%*
+%****************************************************
+%------------------
+	\cs_set:Npn \fc_funcunderline:n #1 {
+	% 1=character
+
+\tl_if_blank:eTF
+		{ #1 }
+		{
+		\tl_set:Nn \l_tmpc_tl { \c_space_token }
+		}
+%	else:
+	{
+		\tl_set:Nn \l_tmpc_tl {
+				#1 
+				\llap {
+				\g_tmpa_tl
+				}
+		}
+%	\fi:
+	}
+%	\tl_show:N \l_tmpc_tl
+	\tl_use:N \l_tmpc_tl	
+}
+
+
+\dim_new:N \g_ul_shadewidth_dim
+\dim_gset:Nn \g_ul_shadewidth_dim { -0.32pt }
+
+%****************************************************
+%*
+%****************************************************
+%------------------
+	\cs_set:Npn \fc_funcshade:n #1 {
+	% 1=character
+
+\tl_if_blank:eTF
+		{ #1 }
+		{
+		\tl_set:Nn \l_tmpc_tl { \c_space_token }
+		}
+%	else:
+	{
+		\tl_set:Nn \l_tmpc_tl {
+				#1 
+				\kern \g_ul_shadewidth_dim
+				\llap {
+				\textcolor { \g_tmpa_tl } { #1 }
+				}
+		}
+%	\fi:
+	}
+%	\tl_show:N \l_tmpc_tl
+	\tl_use:N \l_tmpc_tl	
+}
+
+
+
+\dim_new:N \g_ul_spacewidth_dim
+\dim_gset:Nn \g_ul_spacewidth_dim { 1.5ex }
+
+%****************************************************
+%*
+%****************************************************
+%------------------
+	\cs_set:Npn \fc_funcspace:n #1 {
+	% 1=character
+
+\tl_if_blank:eTF
+		{ #1 }
+		{
+		\tl_set:Nn \l_tmpc_tl { \c_space_token }
+		}
+%	else:
+	{
+		\tl_set:Nn \l_tmpc_tl {
+				\hspace { \g_ul_spacewidth_dim }
+				#1 
+				}
+		}
+
+%	\tl_show:N \l_tmpc_tl
+	\tl_use:N \l_tmpc_tl	
+}
+
+
+
+
+
+\NewExpandableDocumentCommand { \setshadewidth } { m } {
+
+	\dim_gset:Nn \g_ul_shadewidth_dim { #1 }
+
+}
+
+
+\NewExpandableDocumentCommand { \setspacewidth } { m } {
+
+	\dim_gset:Nn \g_ul_spacewidth_dim { #1 }
+
+}
+
+
+
+
+
+
+%****************************************************
+%*
+%****************************************************
+%-------------------- Underliner
+\NewExpandableDocumentCommand { \underliner } { o m } {
+% 1=character to use as marker
+% 2=text
+ 				\IfNoValueTF { #1 } 
+						{ \tl_gset:Nn \g_tmpa_tl { _ } } 
+						{ \tl_gset:Nn \g_tmpa_tl { #1 } }
+
+			\tl_set:Nn \l_tmpa_tl { #2 }
+
+		\group_begin:				
+			\ttfamily
+			\large
+%			\begin{quotation}
+%%			\center
+%			\noindent
+			\exp_args:Nx
+			\str_map_function:nN 
+					{ \l_tmpa_tl }
+					\fc_funcunderline:n
+%			\end{quotation}
+		\group_end:				
+
+}
+
+
+%****************************************************
+%*
+%****************************************************
+%-------------------- Shader
+\NewExpandableDocumentCommand { \shader } { O{red} m } {
+% 1=character to use as marker
+% 2=text
+
+			\tl_gset:Nn \g_tmpa_tl { #1 } 
+
+			\tl_set:Nn \l_tmpa_tl { #2 }
+
+		\group_begin:				
+			\exp_args:Nx
+			\str_map_function:nN 
+					{ \l_tmpa_tl }
+					\fc_funcshade:n
+		\group_end:				
+
+}
+
+
+%****************************************************
+%*
+%****************************************************
+%-------------------- Spacer
+\NewExpandableDocumentCommand { \spacer } { O{1.5ex} m } {
+% 1=character to use as marker
+% 2=text
+
+			\tl_gset:Nn \g_tmpa_tl { #1 } 
+
+			\tl_set:Nn \l_tmpa_tl { #2 }
+
+%		\group_begin:				
+			\exp_args:Nx
+			\str_map_function:nN 
+					{ \l_tmpa_tl }
+					\fc_funcspace:n
+%		\group_end:				
+	% space after last letter:
+				\hspace { \g_ul_spacewidth_dim }
+
+}
+
+%+++++
+
+
+\tl_new:N \l_trima_coloura_tl
+\tl_new:N \l_trima_colourb_tl
+\tl_new:N \l_trima_colourc_tl
+\tl_new:N \l_trima_colourd_tl
+
+\dim_new:N \l_trima_widtha_dim
+\dim_new:N \l_trima_widthb_dim
+\dim_new:N \l_trima_widthc_dim
+\dim_new:N \l_trima_widthd_dim
+
+\int_new:N \l_trima_numcolours_int
+
+\tl_new:N \l_trima_format_tl
+
+
+
+
+\keys_define:nn { trima }
+  {
+    trimacoloura .tl_set:N = \l_trima_coloura_tl,
+    trimacolourb .tl_set:N = \l_trima_colourb_tl,
+    trimacolourc .tl_set:N = \l_trima_colourc_tl,
+    trimacolourd .tl_set:N = \l_trima_colourd_tl,
+
+    trimacoloura .default:n = { \tl_set:Nn \l_trima_coloura_tl {red} },
+    trimacolourb .default:n = { \tl_set:Nn \l_trima_colourb_tl {blue} },
+    trimacolourc .default:n = { \tl_set:Nn \l_trima_colourc_tl {red!40!yellow} },
+    trimacolourd .default:n = { \tl_set:Nn \l_trima_colourd_tl {black} },
+
+    trimacoloura .initial:n = { \tl_set:Nn \l_trima_coloura_tl {red} },
+    trimacolourb .initial:n = { \tl_set:Nn \l_trima_colourb_tl {blue} },
+    trimacolourc .initial:n = { \tl_set:Nn \l_trima_colourc_tl {red!40!yellow} },
+    trimacolourd .initial:n = { \tl_set:Nn \l_trima_colourd_tl {black} },
+
+    number-of-colours .int_set:N = \l_trima_numcolours_int,
+    number-of-colours .initial:n = 4,
+    number-of-colours .default:n = 4,
+
+	format .tl_set:N = \l_trima_format_tl,
+
+    trimawidtha .dim_set:N = \l_trima_widtha_dim,
+    trimawidthb .dim_set:N = \l_trima_widthb_dim,
+    trimawidthc .dim_set:N = \l_trima_widthc_dim,
+    trimawidthd .dim_set:N = \l_trima_widthd_dim,
+
+    trimawidtha .default:n = 2em,
+    trimawidthb .default:n = 1.5pt,
+    trimawidthc .default:n = 3.0pt,
+    trimawidthd .default:n = 4.0pt,
+
+    trimawidtha .initial:n = 2em,
+    trimawidthb .initial:n = 1.5pt,
+    trimawidthc .initial:n = 3.0pt,
+    trimawidthd .initial:n = 4.0pt,
+    
+    help .code:n = { \trimahelp },
+    
+  }
+
+
+
+
+
+\box_new:N \l_trima_cola_box
+\box_new:N \l_trima_colb_box
+\box_new:N \l_trima_colc_box
+\box_new:N \l_trima_cold_box
+
+\tl_new:N \l_trima_result_tl
+\tl_new:N \l_trima_text_tl
+
+
+	
+%--------------------------
+\cs_new_protected:Npn \trima_dotrim:n #1 {
+
+\tl_set:Nn \l_trima_text_tl { 
+	\group_begin: 
+		\tl_use:N \l_trima_format_tl 
+		#1 
+	\group_end:
+}
+%\tl_show:N \l_trima_coloura_tl
+
+\hbox_set:Nn 
+	\l_trima_cola_box 
+	{ \textcolor{\tl_use:N \l_trima_coloura_tl}{ \tl_use:N \l_trima_text_tl } }
+
+\hbox_set:Nn 
+	\l_trima_colb_box 
+	{ \textcolor{\tl_use:N \l_trima_colourb_tl}{ \tl_use:N \l_trima_text_tl } }
+\box_set_trim:Nnnnn 
+	\l_trima_colb_box 
+	{\dim_use:N \l_trima_widthb_dim} {0pt} {0pt} {0pt}
+\box_clip:N 
+	\l_trima_colb_box
+
+\hbox_set:Nn 
+	\l_trima_colc_box { 
+	\textcolor{\tl_use:N \l_trima_colourc_tl}{ \tl_use:N \l_trima_text_tl } }
+\box_set_trim:Nnnnn 
+	\l_trima_colc_box 
+	{\dim_use:N \l_trima_widthc_dim} 
+	{0pt} {0pt} {0pt}
+\box_clip:N 
+	\l_trima_colc_box
+
+\hbox_set:Nn 
+	\l_trima_cold_box 
+	{ \textcolor{\tl_use:N \l_trima_colourd_tl}{ \tl_use:N \l_trima_text_tl } }
+\box_set_trim:Nnnnn 
+	\l_trima_cold_box 
+	{\dim_use:N \l_trima_widthd_dim} 
+	{0pt} {0pt} {0pt}
+\box_clip:N 
+	\l_trima_cold_box
+
+
+	\tl_clear:N \l_trima_result_tl
+	\int_case:nnTF
+		{ \l_trima_numcolours_int }
+		{
+       			{ 1 } { 
+       						\tl_set:Nn 
+       							\l_trima_result_tl
+       							{
+       								\box_use:N \l_trima_cola_box 
+       								}
+       						}
+       			{ 2 } { 
+       						\tl_set:Nn 
+       							\l_trima_result_tl
+       							{
+       						\box_use:N \l_trima_cola_box
+       						\llap{\box_use:N \l_trima_colb_box} 
+       								}
+       						}
+       			{ 3 } {
+       						\tl_set:Nn 
+       							\l_trima_result_tl
+       							{
+       						\box_use:N \l_trima_cola_box
+       						\llap{\box_use:N \l_trima_colb_box} 
+       			 			\llap{\box_use:N \l_trima_colc_box} 
+       								}
+       			 			}
+       			{ 4 } { 
+       						\tl_set:Nn 
+       							\l_trima_result_tl
+       							{
+       						\box_use:N \l_trima_cola_box
+       						\llap{\box_use:N \l_trima_colb_box} 
+       			 			\llap{\box_use:N \l_trima_colc_box} 
+       						\llap{\box_use:N \l_trima_cold_box} 
+       								}
+       						}
+		}
+		{}{}
+
+%	{
+	
+       						\tl_use:N 
+       							\l_trima_result_tl
+%	}
+
+  }
+
+
+\NewDocumentCommand { \trimahelp } { } {
+
+\trima[
+trimawidtha=1pt,
+trimawidthb=2.5pt,
+trimawidthc=5pt,
+trimawidthd=8pt,
+trimacoloura=red,
+trimacolourb=blue,
+trimacolourc=red!60!yellow,
+trimacolourd=green,
+]{{\rule{\textwidth}{0.5pt}}} 
+
+\section*{\trima{Introductory \ Tutorial\ to\ \textbackslash} trima\ \trima{Command}}
+
+	\input Acorn.fd
+
+	\hbox_set:Nn
+		\l_tmpa_box
+		{
+		\fontsize{60pt}{72pt}\usefont{U}{Acorn}{xl}{n}
+  		E
+  		} 
+  		
+	\box_use:N \l_tmpa_box
+	\vspace{-1.3\box_ht:N \l_tmpa_box}
+	\hangindent=\dim_eval:n {0.4em+\box_wd:N \l_tmpa_box}
+	\hangafter=-\fp_to_int:n { 2 + \box_ht:N \l_tmpa_box / \baselineskip }
+	\noindent
+	\kern-0.3em\textsc{ach}\ \trimahelptext
+	\tex_par:D
+	\noindent
+	:\hfill\rule{0.32\textwidth}{0.5pt}\hfill :
+
+}
+
+
+\NewDocumentCommand { \trima } { o m } {
+
+
+%		\tl_show:N \l_trima_colourd_tl
+%	\dim_show:N \l_trima_widthc_dim
+
+		\tl_if_novalue:nF{#1}
+		{\keys_set:nn { trima } { #1 } }
+		
+%		\tl_show:N \l_trima_colourd_tl
+		
+	\tl_set:Nn \l_tmpa_tl { #2 }
+
+	\mode_leave_vertical: 
+	\tl_map_function:NN 
+		\l_tmpa_tl 
+		\trima_dotrim:n 
+		
+}
+
+
+
+
+\ExplSyntaxOff
+
+
+
+
+\newcommand\abc{a b c d e f g h i j k l m n o p q r s t u v w x y z }
+\newcommand\abcd{\abc\abc\abc\abc\abc\abc\abc\abc}
+
+\newcommand\udbl{\raisebox{-1.5ex}{\textcolor{red}{*}}\llap{\raisebox{1.5ex}{\textcolor{red}{*}}}}
+\newcommand\uffont[1]{{\ffont\tiny#1}}
+
+\newcommand\ud[1]{\raisebox{-1.5ex}{#1}}
+\newcommand\udn{\ud{-}}
+\newcommand\udnn{\ud{=}}
+\newcommand\udnnn{\ud{\textcolor{red}{=}}}
+
+\newcommand\uu[1]{\raisebox{1.5ex}{#1}}
+\newcommand\uun{\uu{-}}
+\newcommand\uunn{\uu{=}}
+\newcommand\uunnn{\uu{\textcolor{red}{=}}}
+
+\newcommand\uo[1]{\uu{#1}\llap{\ud{#1}}}
+\newcommand\uon{\uo{-}}
+\newcommand\uonn{\uo{=}}
+\newcommand\uonnn{\uo{\textcolor{red}{=}}}
+\newcommand\uonx[1]{\uo{#1}}
+\newcommand\uonnx[1]{\uo{#1}}
+\newcommand\uonnnx[1]{\uo{\textcolor{red}{#1}}}
+\newcommand\fheading[1]{\fcolorbox{black}{blue!8}{{\large#1}}}
+
+
+\begin{document}
+
+
+%+++++++++++++++++++++++++++++++++++
+\fheading{Underlining}: \verb|\underliner{Underlining}|
+
+\bigskip
+\underliner{Underlining} 
+\underliner[\udn]{Underlining} 
+\underliner[\udnn]{Underlining} 
+\underliner[\udnnn]{Underlining}
+
+\bigskip
+\underliner{Underlining} 
+\underliner[\uun]{Underlining} 
+\underliner[\uunn]{Underlining} 
+\underliner[\uunnn]{Underlining}
+
+\bigskip
+\underliner{Underlining} 
+\underliner[\uon]{Underlining} 
+\underliner[\uonn]{Underlining} 
+\underliner[\uonnn]{Underlining}
+
+\bigskip
+\underliner[X]{Underlining} \underliner[/]{Underlining} \underliner[\textcolor{red}{x}]{Underlining} {\hskip2ex\large \textit{Samples}}
+
+\bigskip
+\underliner{Underlining} 
+\underliner[\uonx{*}]{Underlining} 
+\underliner[\uonnx{\^}]{Underlining} 
+\underliner[\uonnnx{{\color{blue}\small @}}]{Underlining}
+
+\bigskip 
+\underliner[\textcolor{blue}{1}\llap{k}]{Underlining} 
+
+\bigskip
+Underlining the \underliner[\raisebox{-1.5ex}{\textcolor{red}{*}}]{old-style} way.
+\abcd 
+
+
+Underlining the \underliner[\raisebox{1.5ex}{\textcolor{red}{*}}]{old-style} way.
+\abcd
+
+Underlining the \underliner[\udbl]{old-style} way.
+\abcd
+
+Underlining the old-style way\kern-0.25em\underliner[\uffont{Once upon a time, there were three bears.}]{.} \abcd
+
+
+%+++++++++++++++++++++++++++++++++++
+\newpage
+\fheading{Shading}: \verb|\shader{Text shading}|
+
+\bigskip
+Text shading \shader{Text shading} Text shading \shader[yellow]{Text shading}
+
+{\color{blue}\Huge\shader[yellow]{Text shading}}
+
+
+{\color{blue}\Huge\shader[red!25!yellow]{abc XYZ}}
+\setshadewidth{-1.4pt}
+
+{\color{blue}\Huge\shader[red!25!yellow]{abc XYZ}}
+
+\setshadewidth{1.4pt}
+
+{\color{blue}\Huge\shader[red!25!yellow]{abc XYZ}}
+
+\verb|\setshadewidth{-1.4pt}|
+
+%+++++++++++++++++++++++++++++++++++
+\newpage
+\fheading{Spacing}: \verb|\spacer{emphasis}|
+
+\bigskip
+Text spacing. \spacer{emphasis} Text spacing. Text spacing. Text spacing.
+
+\setspacewidth{2em}
+
+Text spacing. \spacer{emphasis} Text spacing. Text spacing. Text spacing.
+
+\verb|\setspacewidth{2em}|
+
+
+\newpage
+\fheading{trima}
+
+
+\trima[
+trimawidtha=1pt,
+trimawidthb=2.5pt,
+trimawidthc=5pt,
+trimawidthd=8pt,
+trimacoloura=red,
+trimacolourb=blue,
+trimacolourc=red!60!yellow,
+trimacolourd=green,
+]{{\rule{1.5em}{1em}}} 
+
+\section{\trima{Introduction}}
+
+\trima[help]{}
+
+\end{document}
