@@ -32,10 +32,10 @@
 %=================
 \cs_new_protected:Npn \func_printachar:n #1 {
 %	\token_if_eq_charcode:NNTF #1 #2
-	\iffontchar\font #1 
+	\tex_iffontchar:D\tex_font:D #1 % see FM unicodefonttable.sty 
 	\symbol{#1}
 	\space
-	\fi
+	\fi:
 }
 
 \cs_new_protected:Npn \func_checkablock:n #1 {
@@ -43,12 +43,12 @@
 	\int_gincr:N 
 		\g_uc_glyphtotal_int
 
-	\iffontchar\font #1 
+	\tex_iffontchar:D\tex_font:D #1 
 		\bool_gset_true:N 
 			\g_uc_blockexists_bool
 		\int_gincr:N 
 			\g_uc_glyphcount_int
-	\fi
+	\fi:
 }
 
 %=================
@@ -159,7 +159,21 @@
 		\tl_use:N
 			\g_uc_blockname_tl
 		\group_end:
+		
+		\group_begin:
+		\hfill
+		\ttfamily
+		\footnotesize
+		\space
+		( 
+		U+\tl_use:N \g_uc_blockstart_tl
+		-
+		U+\tl_use:N \g_uc_blockfinish_tl
+		)
+		\group_end:
+		
 		\tex_par:D
+
 
 	\begin{quotation}\noindent
 	\marginpar{{
@@ -210,13 +224,21 @@
 				{ \sort_return_swapped: }
 				{ \sort_return_same: }
 		}
+%	\seq_sort:Nn
+%		\g_uc_main_seq
+%		{
+%			\str_compare:nNnTF
+%				{ ##1 } > { ##2 }
+%				{ \sort_return_swapped: }
+%				{ \sort_return_same: }
+%		}
 }
 
 
 %=================
 \NewDocumentCommand{ \mfsloadaseq }{ m }{
 		\seq_clear:N \g_uc_main_seq
-		\seq_gset_split:Nnn
+		\seq_gset_split_keep_spaces:Nnn
 			\g_uc_main_seq
 			{ , }
 			{ #1 }
@@ -227,28 +249,28 @@
 
 
 \mfsloadaseq{
-Basic Latin;0000..007F;Latin
-,Latin-1 Supplement;0080..00FF;Latin
-,Latin Extended-A;0100..017F;Latin
-,Latin Extended-B;0180..024F;Latin
-,IPA Extensions;0250..02AF;IPA
-,Spacing Modifier Letters;02B0..02FF;Punctuation
-,Combining Diacritical Marks;0300..036F;Punctuation
-,Greek and Coptic;0370..03FF;Greek and Coptic
+Basic~Latin;0000..007F;Latin
+,Latin-1~Supplement;0080..00FF;Latin
+,Latin~Extended-A;0100..017F;Latin
+,Latin~Extended-B;0180..024F;Latin
+,IPA~Extensions;0250..02AF;IPA
+,Spacing~Modifier~Letters;02B0..02FF;Punctuation
+,Combining~Diacritical~Marks;0300..036F;Punctuation
+,Greek~and~Coptic;0370..03FF;Greek and Coptic
 ,Cyrillic;0400..04FF;Cyrillic
-,Cyrillic Supplement;0500..052F;Cyrillic
+,Cyrillic~Supplement;0500..052F;Cyrillic
 ,Armenian;0530..058F;Armenian
 ,Hebrew;0590..05FF;Hebrew
 ,Arabic;0600..06FF;Arabic
 ,Syriac;0700..074F;Syriac
-,Arabic Supplement;0750..077F;Arabic
+,Arabic~Supplement;0750..077F;Arabic
 ,Thaana;0780..07BF;Thaana
 ,NKo;07C0..07FF;NKo
 ,Samaritan;0800..083F;Samaritan
 ,Mandaic;0840..085F;Mandaic
-,Syriac Supplement;0860..086F;Syriac
-,Arabic Extended-B;0870..089F;Arabic
-,Arabic Extended-A;08A0..08FF;Arabic
+,Syriac~Supplement;0860..086F;Syriac
+,Arabic~Extended-B;0870..089F;Arabic
+,Arabic~Extended-A;08A0..08FF;Arabic
 ,Devanagari;0900..097F;Devanagari
 ,Bengali;0980..09FF;Bengali
 ,Gurmukhi;0A00..0A7F;Gurmukhi
@@ -264,11 +286,11 @@ Basic Latin;0000..007F;Latin
 ,Tibetan;0F00..0FFF;Tibetan
 ,Myanmar;1000..109F;Myanmar
 ,Georgian;10A0..10FF;Georgian
-,Hangul Jamo;1100..11FF;Hangul Jamo
+,Hangul~Jamo;1100..11FF;Hangul Jamo
 ,Ethiopic;1200..137F;Ethiopic
-,Ethiopic Supplement;1380..139F;Ethiopic
+,Ethiopic~Supplement;1380..139F;Ethiopic
 ,Cherokee;13A0..13FF;Cherokee
-,Unified Canadian Aboriginal Syllabics;1400..167F;Unified Canadian Aboriginal Syllabics
+,Unified~Canadian~Aboriginal~Syllabics;1400..167F;Unified Canadian Aboriginal Syllabics
 ,Ogham;1680..169F;Ogham
 ,Runic;16A0..16FF;Runic
 ,Tagalog;1700..171F;Tagalog
@@ -277,175 +299,175 @@ Basic Latin;0000..007F;Latin
 ,Tagbanwa;1760..177F;Tagbanwa
 ,Khmer;1780..17FF;Khmer
 ,Mongolian;1800..18AF;Mongolian
-,Unified Canadian Aboriginal Syllabics Extended;18B0..18FF;Unified Canadian Aboriginal Syllabics
+,Unified~Canadian~Aboriginal~Syllabics~Extended;18B0..18FF;Unified Canadian Aboriginal Syllabics
 ,Limbu;1900..194F;Limbu
-,Tai Le;1950..197F;Tai Le
-,New Tai Lue;1980..19DF;New Tai Lue
-,Khmer Symbols;19E0..19FF;Khmer
+,Tai~Le;1950..197F;Tai Le
+,New~Tai~Lue;1980..19DF;New Tai Lue
+,Khmer~Symbols;19E0..19FF;Khmer
 ,Buginese;1A00..1A1F;Buginese
-,Tai Tham;1A20..1AAF;Tai Tham
-,Combining Diacritical Marks Extended;1AB0..1AFF;Punctuation
+,Tai~Tham;1A20..1AAF;Tai Tham
+,Combining~Diacritical~Marks~Extended;1AB0..1AFF;Punctuation
 ,Balinese;1B00..1B7F;Balinese
 ,Sundanese;1B80..1BBF;Sundanese
 ,Batak;1BC0..1BFF;Batak
 ,Lepcha;1C00..1C4F;Lepcha
-,Ol Chiki;1C50..1C7F;Ol Chiki
-,Cyrillic Extended-C;1C80..1C8F;Cyrillic
-,Georgian Extended;1C90..1CBF;Georgian
-,Sundanese Supplement;1CC0..1CCF;Sundanese
-,Vedic Extensions;1CD0..1CFF;Vedic Extensions
-,Phonetic Extensions;1D00..1D7F;Phonetic Extensions
-,Phonetic Extensions Supplement;1D80..1DBF;Phonetic Extensions
-,Combining Diacritical Marks Supplement;1DC0..1DFF;Punctuation
-,Latin Extended Additional;1E00..1EFF;Latin
-,Greek Extended;1F00..1FFF;Greek and Coptic
-,General Punctuation;2000..206F;Punctuation
-,Superscripts and Subscripts;2070..209F;Latin
-,Currency Symbols;20A0..20CF;Currency Symbols
-,Combining Diacritical Marks for Symbols;20D0..20FF;Combining Diacritical Marks for Symbols
-,Letterlike Symbols;2100..214F;Letterlike Symbols
-,Number Forms;2150..218F;Number Forms
+,Ol~Chiki;1C50..1C7F;Ol Chiki
+,Cyrillic~Extended-C;1C80..1C8F;Cyrillic
+,Georgian~Extended;1C90..1CBF;Georgian
+,Sundanese~Supplement;1CC0..1CCF;Sundanese
+,Vedic~Extensions;1CD0..1CFF;Vedic Extensions
+,Phonetic~Extensions;1D00..1D7F;Phonetic Extensions
+,Phonetic~Extensions~Supplement;1D80..1DBF;Phonetic Extensions
+,Combining~Diacritical~Marks~Supplement;1DC0..1DFF;Punctuation
+,Latin~Extended~Additional;1E00..1EFF;Latin
+,Greek~Extended;1F00..1FFF;Greek and Coptic
+,General~Punctuation;2000..206F;Punctuation
+,Superscripts~and~Subscripts;2070..209F;Latin
+,Currency~Symbols;20A0..20CF;Currency Symbols
+,Combining~Diacritical~Marks~for~Symbols;20D0..20FF;Combining Diacritical Marks for Symbols
+,Letterlike~Symbols;2100..214F;Letterlike Symbols
+,Number~Forms;2150..218F;Number Forms
 ,Arrows;2190..21FF;Arrows
-,Mathematical Operators;2200..22FF;Mathematical Operators
-,Miscellaneous Technical;2300..23FF;Miscellaneous Technical
-,Control Pictures;2400..243F;Control Pictures
-,Optical Character Recognition;2440..245F;Optical Character Recognition
-,Enclosed Alphanumerics;2460..24FF;Enclosed Alphanumerics
-,Box Drawing;2500..257F;Box Drawing
-,Block Elements;2580..259F;Block Elements
-,Geometric Shapes;25A0..25FF;Geometric Shapes
-,Miscellaneous Symbols;2600..26FF;Miscellaneous Symbols
+,Mathematical~Operators;2200..22FF;Mathematical Operators
+,Miscellaneous~Technical;2300..23FF;Miscellaneous Technical
+,Control~Pictures;2400..243F;Control Pictures
+,Optical~Character~Recognition;2440..245F;Optical Character Recognition
+,Enclosed~Alphanumerics;2460..24FF;Enclosed Alphanumerics
+,Box~Drawing;2500..257F;Box Drawing
+,Block~Elements;2580..259F;Block Elements
+,Geometric~Shapes;25A0..25FF;Geometric Shapes
+,Miscellaneous~Symbols;2600..26FF;Miscellaneous Symbols
 ,Dingbats;2700..27BF;Dingbats
-,Miscellaneous Mathematical Symbols-A;27C0..27EF;Mathematical
-,Supplemental Arrows-A;27F0..27FF;Arrows
-,Braille Patterns;2800..28FF;Braille Patterns
-,Supplemental Arrows-B;2900..297F;Arrows
-,Miscellaneous Mathematical Symbols-B;2980..29FF;Mathematical
-,Supplemental Mathematical Operators;2A00..2AFF;Mathematical Operators
-,Miscellaneous Symbols and Arrows;2B00..2BFF;Miscellaneous Symbols and Arrows
+,Miscellaneous~Mathematical~Symbols-A;27C0..27EF;Mathematical
+,Supplemental~Arrows-A;27F0..27FF;Arrows
+,Braille~Patterns;2800..28FF;Braille Patterns
+,Supplemental~Arrows-B;2900..297F;Arrows
+,Miscellaneous~Mathematical~Symbols-B;2980..29FF;Mathematical
+,Supplemental~Mathematical~Operators;2A00..2AFF;Mathematical Operators
+,Miscellaneous~Symbols~and~Arrows;2B00..2BFF;Miscellaneous Symbols and Arrows
 ,Glagolitic;2C00..2C5F;Glagolitic
-,Latin Extended-C;2C60..2C7F;Latin
+,Latin~Extended-C;2C60..2C7F;Latin
 ,Coptic;2C80..2CFF;Coptic
-,Georgian Supplement;2D00..2D2F;Georgian
+,Georgian~Supplement;2D00..2D2F;Georgian
 ,Tifinagh;2D30..2D7F;Tifinagh
-,Ethiopic Extended;2D80..2DDF;Ethiopic
-,Cyrillic Extended-A;2DE0..2DFF;Cyrillic
-,Supplemental Punctuation;2E00..2E7F;Punctuation
-,CJK Radicals Supplement;2E80..2EFF;CJK
-,Kangxi Radicals;2F00..2FDF;CJK
-,Ideographic Description Characters;2FF0..2FFF;CJK
-,CJK Symbols and Punctuation;3000..303F;CJK
+,Ethiopic~Extended;2D80..2DDF;Ethiopic
+,Cyrillic~Extended-A;2DE0..2DFF;Cyrillic
+,Supplemental~Punctuation;2E00..2E7F;Punctuation
+,CJK~Radicals~Supplement;2E80..2EFF;CJK
+,Kangxi~Radicals;2F00..2FDF;CJK
+,Ideographic~Description~Characters;2FF0..2FFF;CJK
+,CJK~Symbols~and~Punctuation;3000..303F;CJK
 ,Hiragana;3040..309F;Hiragana
 ,Katakana;30A0..30FF;Katakana
 ,Bopomofo;3100..312F;Bopomofo
-,Hangul Compatibility Jamo;3130..318F;Hangul Compatibility Jamo
+,Hangul~Compatibility~Jamo;3130..318F;Hangul Compatibility Jamo
 ,Kanbun;3190..319F;Kanbun
-,Bopomofo Extended;31A0..31BF;Bopomofo
-,CJK Strokes;31C0..31EF;CJK
-,Katakana Phonetic Extensions;31F0..31FF;CJK
-,Enclosed CJK Letters and Months;3200..32FF;CJK
-,CJK Compatibility;3300..33FF;CJK
-,CJK Unified Ideographs Extension A;3400..4DBF;CJK
-,Yijing Hexagram Symbols;4DC0..4DFF;CJK
-,CJK Unified Ideographs;4E00..9FFF;CJK
-,Yi Syllables;A000..A48F;Yi
-,Yi Radicals;A490..A4CF;Yi
+,Bopomofo~Extended;31A0..31BF;Bopomofo
+,CJK~Strokes;31C0..31EF;CJK
+,Katakana~Phonetic~Extensions;31F0..31FF;CJK
+,Enclosed~CJK~Letters~and~Months;3200..32FF;CJK
+,CJK~Compatibility;3300..33FF;CJK
+,CJK~Unified~Ideographs~Extension~A;3400..4DBF;CJK
+,Yijing~Hexagram~Symbols;4DC0..4DFF;CJK
+,CJK~Unified~Ideographs;4E00..9FFF;CJK
+,Yi~Syllables;A000..A48F;Yi
+,Yi~Radicals;A490..A4CF;Yi
 ,Lisu;A4D0..A4FF;Lisu
 ,Vai;A500..A63F;Vai
-,Cyrillic Extended-B;A640..A69F;Cyrillic
+,Cyrillic~Extended-B;A640..A69F;Cyrillic
 ,Bamum;A6A0..A6FF;Bamum
-,Modifier Tone Letters;A700..A71F;Modifier Tone Letters
-,Latin Extended-D;A720..A7FF;Latin
-,Syloti Nagri;A800..A82F;Syloti Nagri
-,Common Indic Number Forms;A830..A83F;Common Indic Number Forms
+,Modifier~Tone~Letters;A700..A71F;Modifier Tone Letters
+,Latin~Extended-D;A720..A7FF;Latin
+,Syloti~Nagri;A800..A82F;Syloti Nagri
+,Common~Indic~Number~Forms;A830..A83F;Common Indic Number Forms
 ,Phags-pa;A840..A87F;Phags-pa
 ,Saurashtra;A880..A8DF;Saurashtra
-,Devanagari Extended;A8E0..A8FF;Devanagari
-,Kayah Li;A900..A92F;Kayah Li
+,Devanagari~Extended;A8E0..A8FF;Devanagari
+,Kayah~Li;A900..A92F;Kayah Li
 ,Rejang;A930..A95F;Rejang
-,Hangul Jamo Extended-A;A960..A97F;Hangul Jamo
+,Hangul~Jamo~Extended-A;A960..A97F;Hangul Jamo
 ,Javanese;A980..A9DF;Javanese
-,Myanmar Extended-B;A9E0..A9FF;Myanmar
+,Myanmar~Extended-B;A9E0..A9FF;Myanmar
 ,Cham;AA00..AA5F;Cham
-,Myanmar Extended-A;AA60..AA7F;Myanmar
-,Tai Viet;AA80..AADF;Tai Viet
-,Meetei Mayek Extensions;AAE0..AAFF;Meetei Mayek
-,Ethiopic Extended-A;AB00..AB2F;Ethiopic
-,Latin Extended-E;AB30..AB6F;Latin
-,Cherokee Supplement;AB70..ABBF;Cherokee
-,Meetei Mayek;ABC0..ABFF;Meetei Mayek
-,Hangul Syllables;AC00..D7AF;Hangul Syllables
-,Hangul Jamo Extended-B;D7B0..D7FF;Hangul Jamo
-,Private Use Area;E000..F8FF;Private Use Area
-,CJK Compatibility Ideographs;F900..FAFF;CJK
-,Alphabetic Presentation Forms;FB00..FB4F;Alphabetic Presentation Forms
-,Arabic Presentation Forms-A;FB50..FDFF;arabic
-,Variation Selectors;FE00..FE0F;Variation Selectors
-,Vertical Forms;FE10..FE1F;CJK
-,Combining Half Marks;FE20..FE2F;CJK
-,CJK Compatibility Forms;FE30..FE4F;CJK
-,Small Form Variants;FE50..FE6F;CJK
-,Arabic Presentation Forms-B;FE70..FEFF;arabic
-,Halfwidth and Fullwidth Forms;FF00..FFEF;CJK
+,Myanmar~Extended-A;AA60..AA7F;Myanmar
+,Tai~Viet;AA80..AADF;Tai Viet
+,Meetei~Mayek~Extensions;AAE0..AAFF;Meetei Mayek
+,Ethiopic~Extended-A;AB00..AB2F;Ethiopic
+,Latin~Extended-E;AB30..AB6F;Latin
+,Cherokee~Supplement;AB70..ABBF;Cherokee
+,Meetei~Mayek;ABC0..ABFF;Meetei Mayek
+,Hangul~Syllables;AC00..D7AF;Hangul Syllables
+,Hangul~Jamo~Extended-B;D7B0..D7FF;Hangul Jamo
+,Private~Use~Area;E000..F8FF;Private Use Area
+,CJK~Compatibility~Ideographs;F900..FAFF;CJK
+,Alphabetic~Presentation~Forms;FB00..FB4F;Alphabetic Presentation Forms
+,Arabic~Presentation~Forms-A;FB50..FDFF;arabic
+,Variation~Selectors;FE00..FE0F;Variation Selectors
+,Vertical~Forms;FE10..FE1F;CJK
+,Combining~Half~Marks;FE20..FE2F;CJK
+,CJK~Compatibility~Forms;FE30..FE4F;CJK
+,Small~Form~Variants;FE50..FE6F;CJK
+,Arabic~Presentation~Forms-B;FE70..FEFF;arabic
+,Halfwidth~and~Fullwidth~Forms;FF00..FFEF;CJK
 ,Specials;FFF0..FFFF;Specials
-,Linear B Syllabary;10000..1007F;Linear B
-,Linear B Ideograms;10080..100FF;Linear B
-,Aegean Numbers;10100..1013F;Aegean Numbers
-,Ancient Greek Numbers;10140..1018F;Ancient Greek Numbers
-,Ancient Symbols;10190..101CF;Ancient Symbols
-,Phaistos Disc;101D0..101FF;Phaistos Disc
+,Linear~B~Syllabary;10000..1007F;Linear B
+,Linear~B~Ideograms;10080..100FF;Linear B
+,Aegean~Numbers;10100..1013F;Aegean Numbers
+,Ancient~Greek~Numbers;10140..1018F;Ancient Greek Numbers
+,Ancient~Symbols;10190..101CF;Ancient Symbols
+,Phaistos~Disc;101D0..101FF;Phaistos Disc
 ,Lycian;10280..1029F;Lycian
 ,Carian;102A0..102DF;Carian
-,Coptic Epact Numbers;102E0..102FF;Coptic
-,Old Italic;10300..1032F;Old Italic
+,Coptic~Epact~Numbers;102E0..102FF;Coptic
+,Old~Italic;10300..1032F;Old Italic
 ,Gothic;10330..1034F;Gothic
-,Old Permic;10350..1037F;Old Permic
+,Old~Permic;10350..1037F;Old Permic
 ,Ugaritic;10380..1039F;Ugaritic
-,Old Persian;103A0..103DF;Old Persian
+,Old~Persian;103A0..103DF;Old Persian
 ,Deseret;10400..1044F;Deseret
 ,Shavian;10450..1047F;Shavian
 ,Osmanya;10480..104AF;Osmanya
 ,Osage;104B0..104FF;Osage
 ,Elbasan;10500..1052F;Elbasan
-,Caucasian Albanian;10530..1056F;Caucasian Albanian
+,Caucasian~Albanian;10530..1056F;Caucasian Albanian
 ,Vithkuqi;10570..105BF;Vithkuqi
-,Linear A;10600..1077F;Linear A
-,Latin Extended-F;10780..107BF;Latin
-,Cypriot Syllabary;10800..1083F;Cypriot Syllabary
-,Imperial Aramaic;10840..1085F;Imperial Aramaic
+,Linear~A;10600..1077F;Linear A
+,Latin~Extended-F;10780..107BF;Latin
+,Cypriot~Syllabary;10800..1083F;Cypriot Syllabary
+,Imperial~Aramaic;10840..1085F;Imperial Aramaic
 ,Palmyrene;10860..1087F;Palmyrene
 ,Nabataean;10880..108AF;Nabataean
 ,Hatran;108E0..108FF;Hatran
 ,Phoenician;10900..1091F;Phoenician
 ,Lydian;10920..1093F;Lydian
-,Meroitic Hieroglyphs;10980..1099F;Meroitic Hieroglyphs
-,Meroitic Cursive;109A0..109FF;Meroitic Cursive
+,Meroitic~Hieroglyphs;10980..1099F;Meroitic Hieroglyphs
+,Meroitic~Cursive;109A0..109FF;Meroitic Cursive
 ,Kharoshthi;10A00..10A5F;Kharoshthi
-,Old South Arabian;10A60..10A7F;Old South Arabian
-,Old North Arabian;10A80..10A9F;Old North Arabian
+,Old~South~Arabian;10A60..10A7F;Old South Arabian
+,Old~North~Arabian;10A80..10A9F;Old North Arabian
 ,Manichaean;10AC0..10AFF;Manichaean
 ,Avestan;10B00..10B3F;Avestan
-,Inscriptional Parthian;10B40..10B5F;Inscriptional Parthian
-,Inscriptional Pahlavi;10B60..10B7F;Inscriptional Pahlavi
-,Psalter Pahlavi;10B80..10BAF;Psalter Pahlavi
-,Old Turkic;10C00..10C4F;Old Turkic
-,Old Hungarian;10C80..10CFF;Old Hungarian
-,Hanifi Rohingya;10D00..10D3F;Hanifi Rohingya
-,Rumi Numeral Symbols;10E60..10E7F;Rumi Numeral Symbols
+,Inscriptional~Parthian;10B40..10B5F;Inscriptional Parthian
+,Inscriptional~Pahlavi;10B60..10B7F;Inscriptional Pahlavi
+,Psalter~Pahlavi;10B80..10BAF;Psalter Pahlavi
+,Old~Turkic;10C00..10C4F;Old Turkic
+,Old~Hungarian;10C80..10CFF;Old Hungarian
+,Hanifi~Rohingya;10D00..10D3F;Hanifi Rohingya
+,Rumi~Numeral~Symbols;10E60..10E7F;Rumi Numeral Symbols
 ,Yezidi;10E80..10EBF;Yezidi
-,Arabic Extended-C;10EC0..10EFF;arabic
-,Old Sogdian;10F00..10F2F;Old Sogdian
+,Arabic~Extended-C;10EC0..10EFF;arabic
+,Old~Sogdian;10F00..10F2F;Old Sogdian
 ,Sogdian;10F30..10F6F;Sogdian
-,Old Uyghur;10F70..10FAF;Old Uyghur
+,Old~Uyghur;10F70..10FAF;Old Uyghur
 ,Chorasmian;10FB0..10FDF;Chorasmian
 ,Elymaic;10FE0..10FFF;Elymaic
 ,Brahmi;11000..1107F;Brahmi
 ,Kaithi;11080..110CF;Kaithi
-,Sora Sompeng;110D0..110FF;Sora Sompeng
+,Sora~Sompeng;110D0..110FF;Sora Sompeng
 ,Chakma;11100..1114F;Chakma
 ,Mahajani;11150..1117F;Mahajani
 ,Sharada;11180..111DF;Sharada
-,Sinhala Archaic Numbers;111E0..111FF;Sinhala Archaic Numbers
+,Sinhala~Archaic~Numbers;111E0..111FF;Sinhala Archaic Numbers
 ,Khojki;11200..1124F;Khojki
 ,Multani;11280..112AF;Multani
 ,Khudawadi;112B0..112FF;Khudawadi
@@ -454,104 +476,104 @@ Basic Latin;0000..007F;Latin
 ,Tirhuta;11480..114DF;Tirhuta
 ,Siddham;11580..115FF;Siddham
 ,Modi;11600..1165F;Modi
-,Mongolian Supplement;11660..1167F;Mongolian
+,Mongolian~Supplement;11660..1167F;Mongolian
 ,Takri;11680..116CF;Takri
 ,Ahom;11700..1174F;Ahom
 ,Dogra;11800..1184F;Dogra
-,Warang Citi;118A0..118FF;Warang Citi
-,Dives Akuru;11900..1195F;Dives Akuru
+,Warang~Citi;118A0..118FF;Warang Citi
+,Dives~Akuru;11900..1195F;Dives Akuru
 ,Nandinagari;119A0..119FF;Nandinagari
-,Zanabazar Square;11A00..11A4F;Zanabazar Square
+,Zanabazar~Square;11A00..11A4F;Zanabazar Square
 ,Soyombo;11A50..11AAF;Soyombo
-,Unified Canadian Aboriginal Syllabics Extended-A;11AB0..11ABF;Unified Canadian Aboriginal Syllabics Extended-A
-,Pau Cin Hau;11AC0..11AFF;Pau Cin Hau
-,Devanagari Extended-A;11B00..11B5F;Devanagari
+,Unified~Canadian~Aboriginal~Syllabics~Extended-A;11AB0..11ABF;Unified Canadian Aboriginal Syllabics Extended-A
+,Pau~Cin~Hau;11AC0..11AFF;Pau Cin Hau
+,Devanagari~Extended-A;11B00..11B5F;Devanagari
 ,Bhaiksuki;11C00..11C6F;Bhaiksuki
 ,Marchen;11C70..11CBF;Marchen
-,Masaram Gondi;11D00..11D5F;Masaram Gondi
-,Gunjala Gondi;11D60..11DAF;Gunjala Gondi
+,Masaram~Gondi;11D00..11D5F;Masaram Gondi
+,Gunjala~Gondi;11D60..11DAF;Gunjala Gondi
 ,Makasar;11EE0..11EFF;Makasar
 ,Kawi;11F00..11F5F;Kawi
-,Lisu Supplement;11FB0..11FBF;Lisu Supplement
-,Tamil Supplement;11FC0..11FFF;Tamil Supplement
+,Lisu~Supplement;11FB0..11FBF;Lisu Supplement
+,Tamil~Supplement;11FC0..11FFF;Tamil Supplement
 ,Cuneiform;12000..123FF;Cuneiform
-,Cuneiform Numbers and Punctuation;12400..1247F;Cuneiform
-,Early Dynastic Cuneiform;12480..1254F;Early Dynastic Cuneiform
+,Cuneiform~Numbers~and~Punctuation;12400..1247F;Cuneiform
+,Early~Dynastic~Cuneiform;12480..1254F;Early Dynastic Cuneiform
 ,Cypro-Minoan;12F90..12FFF;Cypro-Minoan
-,Egyptian Hieroglyphs;13000..1342F;Egyptian Hieroglyphs
-,Egyptian Hieroglyph Format Controls;13430..1345F;Egyptian Hieroglyph Format Controls
-,Anatolian Hieroglyphs;14400..1467F;Anatolian Hieroglyphs
-,Bamum Supplement;16800..16A3F;Bamum
+,Egyptian~Hieroglyphs;13000..1342F;Egyptian Hieroglyphs
+,Egyptian~Hieroglyph~Format~Controls;13430..1345F;Egyptian Hieroglyph Format Controls
+,Anatolian~Hieroglyphs;14400..1467F;Anatolian Hieroglyphs
+,Bamum~Supplement;16800..16A3F;Bamum
 ,Mro;16A40..16A6F;Mro
 ,Tangsa;16A70..16ACF;Tangsa
-,Bassa Vah;16AD0..16AFF;Bassa Vah
-,Pahawh Hmong;16B00..16B8F;Pahawh Hmong
+,Bassa~Vah;16AD0..16AFF;Bassa Vah
+,Pahawh~Hmong;16B00..16B8F;Pahawh Hmong
 ,Medefaidrin;16E40..16E9F;Medefaidrin
 ,Miao;16F00..16F9F;Miao
-,Ideographic Symbols and Punctuation;16FE0..16FFF;Ideographic Symbols and Punctuation
+,Ideographic~Symbols~and~Punctuation;16FE0..16FFF;Ideographic Symbols and Punctuation
 ,Tangut;17000..187FF;Tangut
-,Tangut Components;18800..18AFF;Tangut
-,Khitan Small Script;18B00..18CFF;Khitan Small Script
-,Tangut Supplement;18D00..18D7F;Tangut
-,Kana Extended-B;1AFF0..1AFFF;Kana
-,Kana Supplement;1B000..1B0FF;Kana
-,Kana Extended-A;1B100..1B12F;Kana
-,Small Kana Extension;1B130..1B16F;Kana
+,Tangut~Components;18800..18AFF;Tangut
+,Khitan~Small~Script;18B00..18CFF;Khitan Small Script
+,Tangut~Supplement;18D00..18D7F;Tangut
+,Kana~Extended-B;1AFF0..1AFFF;Kana
+,Kana~Supplement;1B000..1B0FF;Kana
+,Kana~Extended-A;1B100..1B12F;Kana
+,Small~Kana~Extension;1B130..1B16F;Kana
 ,Nushu;1B170..1B2FF;Nushu
 ,Duployan;1BC00..1BC9F;Duployan
-,Shorthand Format Controls;1BCA0..1BCAF;Shorthand Format Controls
-,Znamenny Musical Notation;1CF00..1CFCF;Znamenny Musical Notation
-,Byzantine Musical Symbols;1D000..1D0FF;Byzantine Musical Symbols
-,Musical Symbols;1D100..1D1FF;Musical Symbols
-,Ancient Greek Musical Notation;1D200..1D24F;Ancient Greek Musical Notation
-,Kaktovik Numerals;1D2C0..1D2DF;Kaktovik Numerals
-,Mayan Numerals;1D2E0..1D2FF;Mayan Numerals
-,Tai Xuan Jing Symbols;1D300..1D35F;Tai Xuan Jing Symbols
-,Counting Rod Numerals;1D360..1D37F;Counting Rod Numerals
-,Mathematical Alphanumeric Symbols;1D400..1D7FF;Mathematical Alphanumeric Symbols
-,Sutton SignWriting;1D800..1DAAF;Sutton SignWriting
-,Latin Extended-G;1DF00..1DFFF;Latin
-,Glagolitic Supplement;1E000..1E02F;Glagolitic
-,Cyrillic Extended-D;1E030..1E08F;Cyrillic
-,Nyiakeng Puachue Hmong;1E100..1E14F;Nyiakeng Puachue Hmong
+,Shorthand~Format~Controls;1BCA0..1BCAF;Shorthand Format Controls
+,Znamenny~Musical~Notation;1CF00..1CFCF;Znamenny Musical Notation
+,Byzantine~Musical~Symbols;1D000..1D0FF;Byzantine Musical Symbols
+,Musical~Symbols;1D100..1D1FF;Musical Symbols
+,Ancient~Greek~Musical~Notation;1D200..1D24F;Ancient Greek Musical Notation
+,Kaktovik~Numerals;1D2C0..1D2DF;Kaktovik Numerals
+,Mayan~Numerals;1D2E0..1D2FF;Mayan Numerals
+,Tai~Xuan~Jing~Symbols;1D300..1D35F;Tai Xuan Jing Symbols
+,Counting~Rod~Numerals;1D360..1D37F;Counting Rod Numerals
+,Mathematical~Alphanumeric~Symbols;1D400..1D7FF;Mathematical Alphanumeric Symbols
+,Sutton~SignWriting;1D800..1DAAF;Sutton SignWriting
+,Latin~Extended-G;1DF00..1DFFF;Latin
+,Glagolitic~Supplement;1E000..1E02F;Glagolitic
+,Cyrillic~Extended-D;1E030..1E08F;Cyrillic
+,Nyiakeng~Puachue~Hmong;1E100..1E14F;Nyiakeng Puachue Hmong
 ,Toto;1E290..1E2BF;Toto
 ,Wancho;1E2C0..1E2FF;Wancho
-,Nag Mundari;1E4D0..1E4FF;Nag Mundari
-,Ethiopic Extended-B;1E7E0..1E7FF;Ethiopic
-,Mende Kikakui;1E800..1E8DF;Mende Kikakui
+,Nag~Mundari;1E4D0..1E4FF;Nag Mundari
+,Ethiopic~Extended-B;1E7E0..1E7FF;Ethiopic
+,Mende~Kikakui;1E800..1E8DF;Mende Kikakui
 ,Adlam;1E900..1E95F;Adlam
-,Indic Siyaq Numbers;1EC70..1ECBF;Indic Siyaq Numbers
-,Ottoman Siyaq Numbers;1ED00..1ED4F;Ottoman Siyaq Numbers
-,Arabic Mathematical Alphabetic Symbols;1EE00..1EEFF;Arabic Mathematical Alphabetic Symbols
-,Mahjong Tiles;1F000..1F02F;Mahjong Tiles
-,Domino Tiles;1F030..1F09F;Domino Tiles
-,Playing Cards;1F0A0..1F0FF;Playing Cards
-,Enclosed Alphanumeric Supplement;1F100..1F1FF;Enclosed Alphanumeric Supplement
-,Enclosed Ideographic Supplement;1F200..1F2FF;Enclosed Ideographic Supplement
-,Miscellaneous Symbols and Pictographs;1F300..1F5FF;Miscellaneous Symbols and Pictographs
+,Indic~Siyaq~Numbers;1EC70..1ECBF;Indic Siyaq Numbers
+,Ottoman~Siyaq~Numbers;1ED00..1ED4F;Ottoman Siyaq Numbers
+,Arabic~Mathematical~Alphabetic~Symbols;1EE00..1EEFF;Arabic Mathematical Alphabetic Symbols
+,Mahjong~Tiles;1F000..1F02F;Mahjong Tiles
+,Domino~Tiles;1F030..1F09F;Domino Tiles
+,Playing~Cards;1F0A0..1F0FF;Playing Cards
+,Enclosed~Alphanumeric~Supplement;1F100..1F1FF;Enclosed Alphanumeric Supplement
+,Enclosed~Ideographic~Supplement;1F200..1F2FF;Enclosed Ideographic Supplement
+,Miscellaneous~Symbols~and~Pictographs;1F300..1F5FF;Miscellaneous Symbols and Pictographs
 ,Emoticons;1F600..1F64F;Emoticons
-,Ornamental Dingbats;1F650..1F67F;Ornamental Dingbats
-,Transport and Map Symbols;1F680..1F6FF;Transport and Map Symbols
-,Alchemical Symbols;1F700..1F77F;Alchemical Symbols
-,Geometric Shapes Extended;1F780..1F7FF;Geometric Shapes Extended
-,Supplemental Arrows-C;1F800..1F8FF;Arrows
-,Supplemental Symbols and Pictographs;1F900..1F9FF;Supplemental Symbols and Pictographs
-,Chess Symbols;1FA00..1FA6F;Chess Symbols
-,Symbols and Pictographs Extended-A;1FA70..1FAFF;Symbols and Pictographs Extended-A
-,Symbols for Legacy Computing;1FB00..1FBFF;Symbols for Legacy Computing
-,CJK Unified Ideographs Extension B;20000..2A6DF;CJK
-,CJK Unified Ideographs Extension C;2A700..2B73F;CJK
-,CJK Unified Ideographs Extension D;2B740..2B81F;CJK
-,CJK Unified Ideographs Extension E;2B820..2CEAF;CJK
-,CJK Unified Ideographs Extension F;2CEB0..2EBEF;CJK
-,CJK Unified Ideographs Extension I;2EBF0..2EE5F;CJK
-,CJK Compatibility Ideographs Supplement;2F800..2FA1F;CJK
-,CJK Unified Ideographs Extension G;30000..3134F;CJK
-,CJK Unified Ideographs Extension H;31350..323AF;CJK
+,Ornamental~Dingbats;1F650..1F67F;Ornamental Dingbats
+,Transport~and~Map~Symbols;1F680..1F6FF;Transport and Map Symbols
+,Alchemical~Symbols;1F700..1F77F;Alchemical Symbols
+,Geometric~Shapes~Extended;1F780..1F7FF;Geometric Shapes Extended
+,Supplemental~Arrows-C;1F800..1F8FF;Arrows
+,Supplemental~Symbols~and~Pictographs;1F900..1F9FF;Supplemental Symbols and Pictographs
+,Chess~Symbols;1FA00..1FA6F;Chess Symbols
+,Symbols~and~Pictographs~Extended-A;1FA70..1FAFF;Symbols and Pictographs Extended-A
+,Symbols~for~Legacy~Computing;1FB00..1FBFF;Symbols for Legacy Computing
+,CJK~Unified~Ideographs~Extension~B;20000..2A6DF;CJK
+,CJK~Unified~Ideographs~Extension~C;2A700..2B73F;CJK
+,CJK~Unified~Ideographs~Extension~D;2B740..2B81F;CJK
+,CJK~Unified~Ideographs~Extension~E;2B820..2CEAF;CJK
+,CJK~Unified~Ideographs~Extension~F;2CEB0..2EBEF;CJK
+,CJK~Unified~Ideographs~Extension~I;2EBF0..2EE5F;CJK
+,CJK~Compatibility~Ideographs~Supplement;2F800..2FA1F;CJK
+,CJK~Unified~Ideographs~Extension~G;30000..3134F;CJK
+,CJK~Unified~Ideographs~Extension~H;31350..323AF;CJK
 ,Tags;E0000..E007F;Tags
-,Variation Selectors Supplement;E0100..E01EF;Variation Selectors Supplement
-,Supplementary Private Use Area-A;F0000..FFFFF;Private Use Area
-,Supplementary Private Use Area-B;100000..10FFFF;Private Use Area
+,Variation~Selectors~Supplement;E0100..E01EF;Variation Selectors Supplement
+,Supplementary~Private~Use~Area-A;F0000..FFFFF;Private Use Area
+,Supplementary~Private~Use~Area-B;100000..10FFFF;Private Use Area
 }
 
 \ExplSyntaxOff
