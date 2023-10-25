@@ -1,0 +1,346 @@
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage[x11names]{xcolor}
+\pagecolor{Orchid1!4}
+\setmainfont{NotoSerif}
+\newfontfamily\fcmd{NotoSans}[Colour=blue]
+\newcommand\cmd[1]{{\fcmd#1}}
+\directlua {
+luaotfload.add_colorscheme("colredab",
+{
+["FF0000"] = {"a"},
+})
+}
+%
+\newfontfamily\fcmdb{NotoSans}[Colour=colredab]
+\newfontfamily\fcmdc{NotoSerif}[
+ItalicFeatures={Colour=brown},
+]
+\newfontfamily\fcmdd{NotoSerif}[
+ItalicFeatures={Colour=colredab},
+]
+\setmonofont{NotoSansMono}[
+Colour=black,
+Scale=0.72,
+]
+\newcounter{notecounter}
+\newcommand\note[1]{{\color{black}\ttfamily[#1 - \stepcounter{notecounter}\thenotecounter]}}
+
+	
+\ExplSyntaxOn
+
+
+\tl_new:N \l_trima_coloura_tl
+\tl_new:N \l_trima_colourb_tl
+\tl_new:N \l_trima_widtha_tl
+\tl_new:N \l_trima_format_tl
+
+\tl_new:N \l_trima_top_tl
+\tl_new:N \l_trima_bottom_tl
+\tl_new:N \l_trima_left_tl
+\tl_new:N \l_trima_right_tl
+\bool_new:N \l_trima_rightbool_bool
+\dim_new:N \l_trima_kernamount_dim
+
+
+\keys_define:nn { trima }
+  {
+    trimacoloura .tl_set:N = \l_trima_coloura_tl,
+    trimacoloura .default:n = { \tl_set:Nn \l_trima_coloura_tl {red} },
+    trimacoloura .initial:n = { \tl_set:Nn \l_trima_coloura_tl {red} },
+    trimacolourb .tl_set:N = \l_trima_colourb_tl,
+    trimacolourb .default:n = { \tl_set:Nn \l_trima_colourb_tl {black} },
+    trimacolourb .initial:n = { \tl_set:Nn \l_trima_colourb_tl {black} },
+
+	format .tl_set:N = \l_trima_format_tl,
+
+    trimawidtha .tl_set:N = \l_trima_widtha_tl,
+    trimawidtha .default:n = 0.5,
+    trimawidtha .initial:n = 0.5,
+    
+    trimatop .tl_set:N = \l_trima_top_tl,
+    trimatop .default:n = 0,
+    trimatop .initial:n = 0,    
+
+    trimabottom .tl_set:N = \l_trima_bottom_tl,
+    trimabottom .default:n = 0,
+    trimabottom .initial:n = 0,    
+    
+    trimaleft .tl_set:N = \l_trima_left_tl,
+    trimaleft .default:n = 0,
+    trimaleft .initial:n = 0,    
+%    trimaleft .code = {\bool_set_false:N \l_trima_rightbool_bool},
+    
+    trimaright .tl_set:N = \l_trima_right_tl,
+    trimaright .default:n = 0,
+    trimaright .initial:n = 0,    
+    
+    trimauseright .bool_set:N = \l_trima_rightbool_bool,
+    trimauseright .default:n = true,
+    trimauseright .initial:n = true,    
+        
+  }
+
+
+
+
+
+\box_new:N \l_trima_cola_box
+\box_new:N \l_trima_colb_box
+\box_new:N \l_trima_fill_box
+
+\tl_new:N \l_trima_result_tl
+\tl_new:N \l_trima_text_tl
+
+
+	
+%--------------------------
+\cs_new_protected:Npn \trima_dotrim:o #1 {
+
+\tl_set:Nn \l_trima_text_tl { 
+	\group_begin: 
+		\tl_use:N \l_trima_format_tl 
+		#1 
+	\group_end:
+}
+
+%\bool_show:N \l_trima_rightbool_bool
+
+\hbox_set:Nn 
+	\l_trima_cola_box 
+	{ \textcolor{\tl_use:N \l_trima_coloura_tl}{ \tl_use:N \l_trima_text_tl } }
+
+\hbox_set:Nn 
+	\l_trima_colb_box 
+	{ \textcolor{\tl_use:N \l_trima_colourb_tl}{ \tl_use:N \l_trima_text_tl } }
+
+%\dim_show:N \l_trima_kernamount_dim
+%L=-A-B+C;  R=-A-C; b=-A+B
+%     -(A+B-C)  -(A+C)     -(A-B)
+\dim_compare:nNnTF
+	{ \l_trima_left_tl pt}
+	=
+	{0pt}
+	{%R
+			\dim_set:Nn
+				\l_trima_kernamount_dim
+				{
+					\dim_eval:n {
+						-
+						\box_wd:N \l_trima_cola_box  % RR LL  both
+%						+ %-left+both0right
+%					 	\l_trima_right_tl   \box_wd:N \l_trima_cola_box %both
+						+ %+left0both-right
+					 	\l_trima_left_tl   \box_wd:N \l_trima_cola_box  %RR
+					}
+				}
+	
+	}
+	{
+		\dim_compare:nNnTF
+			{ \l_trima_right_tl pt}
+			=
+			{0pt}
+			{%L
+			\dim_set:Nn
+				\l_trima_kernamount_dim
+				{
+					\dim_eval:n {
+						-
+						\box_wd:N \l_trima_cola_box  % RR LL  both
+						- %-left+both0right
+					 	\l_trima_right_tl   \box_wd:N \l_trima_cola_box %both
+						+ %+left0both-right
+					 	\l_trima_left_tl   \box_wd:N \l_trima_cola_box  %RR
+					}
+				}
+
+			}
+			{%LR
+			\dim_set:Nn
+				\l_trima_kernamount_dim
+				{
+					\dim_eval:n {
+						-
+						\box_wd:N \l_trima_cola_box  % RR LL  both
+						+ %-left+both0right
+					 	\l_trima_right_tl   \box_wd:N \l_trima_cola_box %both
+%						- %+left0both-right
+%					 	\l_trima_left_tl   \box_wd:N \l_trima_cola_box  %RR
+					}
+				}
+			
+			}
+	
+	}
+%\dim_set:Nn
+%	\l_trima_kernamount_dim
+%	{
+%		\dim_eval:n {
+%			-
+%			\box_wd:N \l_trima_cola_box  % RR LL  both
+%			+ %-left+both0right
+%		 	\l_trima_right_tl   \box_wd:N \l_trima_cola_box %both
+%			+ %+left0both-right
+%		 	\l_trima_left_tl   \box_wd:N \l_trima_cola_box  %RR
+%		}
+%	}
+
+%\dim_show:N \l_trima_kernamount_dim
+
+\box_set_trim:Nnnnn 
+	\l_trima_colb_box 
+	{
+		\dim_eval:n { \l_trima_left_tl   \box_wd:N \l_trima_cola_box }  	
+	} {
+			\dim_eval:n { \l_trima_bottom_tl   \box_ht:N \l_trima_cola_box }  	
+	} {
+		\dim_eval:n { \l_trima_right_tl   \box_wd:N \l_trima_cola_box }  		
+	} {
+		\dim_eval:n { \l_trima_top_tl   \box_ht:N \l_trima_cola_box }  		
+	}
+\box_clip:N 
+	\l_trima_colb_box
+
+%%\box_set_wd:Nn
+%%	\l_trima_fill_box
+%%	{ \dim_eval:n {
+%%		\box_wd:N \l_trima_cola_box
+%%%		-
+%%%		\box_wd:N \l_trima_colb_box
+%%		}
+%%	}
+
+	\tl_clear:N \l_trima_result_tl
+%       						\tl_set:Nn 
+%       							\l_trima_result_tl
+%       							{
+%       								\box_use:N \l_trima_cola_box 
+%       								}
+					\bool_if:NTF
+					\l_trima_rightbool_bool
+					{ 
+       						\tl_set:Nn 
+       							\l_trima_result_tl
+       							{
+       						\box_use:N \l_trima_cola_box
+       						\kern\l_trima_kernamount_dim%\box_wd:N \l_trima_cola_box
+       						\box_use:N \l_trima_colb_box 
+       							}
+						}
+						{ 
+       						\tl_set:Nn 
+       							\l_trima_result_tl
+       							{
+       						\box_use:N \l_trima_cola_box
+       						\llap{ \box_use:N \l_trima_colb_box } 
+       							}
+						}
+						
+						
+       						\tl_use:N 
+       							\l_trima_result_tl
+
+	  }
+
+
+
+
+\NewDocumentCommand { \trima } { o m } {
+
+		\tl_if_novalue:nF{#1}
+		{\keys_set:nn { trima } { #1 } }
+
+		
+	\tl_set:Nn \l_tmpa_tl { #2 }
+
+	\mode_leave_vertical: 
+%	\tl_map_function:NN 
+%		\l_tmpa_tl 
+		\trima_dotrim:o {\l_tmpa_tl }
+		
+}
+
+\ExplSyntaxOff
+
+
+
+\begin{document}
+
+
+\trima[
+trimacoloura=green,
+trimacolourb=blue,
+trimaright=0.25,
+%trimauseright=true,
+trimaleft=0,
+%format=\itshape,
+]{right}\hskip2em
+\trima[
+trimacoloura=green,
+trimacolourb=blue,
+trimaright=0,
+%trimauseright=true,
+trimaleft=0.25,
+%format=\itshape,
+]{left}\hskip2em
+\trima[
+trimacoloura=green,
+trimacolourb=blue,
+trimaright=0.25,
+%trimauseright=true,
+trimaleft=0.25,
+%format=\itshape,
+]{both}\hskip2em
+
+
+
+
+
+\large
+a 
+\trima[
+trimacoloura=red,
+trimacolourb=blue,
+trimaright=0.25,
+%trimauseright=true,
+trimaleft=0.25,
+format=\itshape,
+]{abxyz}
+
+\trima[
+trimacoloura=green,
+%%trimacolourb=blue,
+trimaright=0,
+%trimauseright=false,
+trimaleft=0.32,
+trimatop=0.5,
+format=\itshape,
+]{abxyz}
+\note{llap \& kern, trim \& clip}
+
+
+\definecolor{cat}{HTML}{ABCDEF}
+\color{cat} The \textcolor[HTML]{CE8C0A}{cat} sat on the mat.
+\note{color \& textcolor} 
+
+
+\fcmd
+The cat sat on the mat.
+\note{font colour}
+
+\fcmdb
+The cat sat on the mat.
+\note{font colorscheme}
+
+
+\fcmdc
+The cat sat \textit{on the mat}.
+\note{fontface colour}
+
+
+\fcmdd
+The cat sat \textit{on the mat}.
+\note{fontface colorscheme}
+
+\end{document}
